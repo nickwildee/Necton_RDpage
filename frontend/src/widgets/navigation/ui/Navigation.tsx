@@ -24,7 +24,7 @@ export function Navigation() {
   const [globalError, setGlobalError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const displayName = user?.nickname?.trim() || user?.email || '사용자'
-  const isSuperUser = user?.role === 'SUPER_USER'
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
 
   const handleLogout = async () => {
     setIsSubmitting(true)
@@ -68,7 +68,7 @@ export function Navigation() {
                 {item.label}
               </NavLink>
             ))}
-            {isSuperUser && (
+            {isSuperAdmin && (
               <NavLink
                 className={navigationLinkClass}
                 to="/intro/settings"

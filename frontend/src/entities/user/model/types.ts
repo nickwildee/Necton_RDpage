@@ -1,4 +1,4 @@
-export type UserRole = 'USER' | 'SUPER_USER'
+export type UserRole = 'USER' | 'ORG_USER' | 'ORG_ADMIN' | 'SUPER_ADMIN'
 
 export type AuthUser = {
   id: number
