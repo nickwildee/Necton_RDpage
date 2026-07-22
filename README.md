@@ -6,7 +6,7 @@ Necton RD의 인증 화면과 API를 관리하는 저장소입니다. 기존 Dja
 ## 구조
 
 - `backend/`: Django 인증 서버. React 전환이 끝날 때까지 기존 템플릿도 유지합니다.
-- `frontend/`: React, Vite, TypeScript 기반 웹 화면입니다.
+- `frontend/`: React, Vite, TypeScript, Tailwind CSS 기반 웹 화면입니다.
 
 두 프로젝트의 의존성, 환경변수, 실행 명령은 서로 섞지 않습니다.
 
