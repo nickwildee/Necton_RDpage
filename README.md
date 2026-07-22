@@ -44,11 +44,15 @@ Node.js 24 사용을 권장합니다.
 cd frontend
 npm install
 npm run dev
+npm run lint
 npm run build
 ```
 
+개발 서버는 상대 경로 `/api/` 요청을 `http://127.0.0.1:8000`의 Django로
+프록시합니다.
+
 ## 전환 상태
 
-현재 단계는 저장소 분리, 프로젝트 구조 생성, Django JSON 인증 API 구현까지입니다.
-React 인증 화면 연결과 운영용 Nginx/Gunicorn 설정은 후속 단계에서 추가합니다. 기존
-EC2 서비스는 새 서비스 검증이 끝날 때까지 그대로 유지합니다.
+현재 단계는 Django JSON 인증 API와 React 로그인·회원가입 화면 연결까지입니다.
+운영용 Nginx/Gunicorn 설정은 후속 단계에서 추가합니다. 기존 EC2 서비스는 새 서비스
+검증이 끝날 때까지 그대로 유지합니다.
