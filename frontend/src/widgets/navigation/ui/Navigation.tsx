@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { requestError, useAuth } from '@features/auth'
+import { Link, NavLink } from 'react-router-dom'
+import { useNavigation } from '../model/useNavigation'
 
 const navigationItems = [
   { label: '인트로', to: '/intro', end: true },
@@ -19,29 +18,14 @@ function navigationLinkClass({ isActive }: { isActive: boolean }) {
 }
 
 export function Navigation() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const [globalError, setGlobalError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const displayName = user?.nickname?.trim() || user?.email || '사용자'
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
-
-  const handleLogout = async () => {
-    setIsSubmitting(true)
-    setGlobalError(null)
-
-    try {
-      await logout()
-      navigate('/login', {
-        replace: true,
-        state: { notice: '로그아웃되었습니다.' },
-      })
-    } catch (error) {
-      setGlobalError(requestError(error).message)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const {
+    displayName,
+    email,
+    isSuperAdmin,
+    globalError,
+    isSubmitting,
+    handleLogout,
+  } = useNavigation()
 
   return (
     <>
@@ -81,7 +65,7 @@ export function Navigation() {
           <div className="flex min-w-0 items-center justify-end gap-3">
             <span
               className="max-w-48 truncate text-sm font-medium text-[var(--auth-text)] max-sm:max-w-28"
-              title={user?.email}
+              title={email}
             >
               {displayName}
             </span>
