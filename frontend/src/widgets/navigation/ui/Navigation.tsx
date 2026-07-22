@@ -10,7 +10,7 @@ const navigationItems = [
 
 function navigationLinkClass({ isActive }: { isActive: boolean }) {
   return [
-    'inline-flex min-h-11 shrink-0 items-center border-b-2 px-1 text-sm font-semibold no-underline transition-colors duration-150',
+    'inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border-b-2 px-1 text-sm font-semibold no-underline transition-colors duration-150',
     'focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-primary)]',
     isActive
       ? 'border-[var(--auth-primary)] text-[var(--auth-primary-hover)]'
@@ -48,7 +48,7 @@ export function Navigation() {
       <header className="border-b border-[var(--auth-border)] bg-[var(--auth-surface)]">
         <div className="mx-auto grid min-h-[72px] max-w-[1200px] grid-cols-[auto_1fr_auto] items-center gap-x-10 px-6 max-md:grid-cols-[1fr_auto] max-md:gap-x-4 max-md:py-3 lg:px-10">
           <Link
-            className="shrink-0 text-xl font-bold tracking-[-0.01em] text-[var(--auth-text)] no-underline focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-primary)]"
+            className="inline-flex min-h-11 shrink-0 items-center text-xl font-bold tracking-[-0.01em] text-[var(--auth-text)] no-underline focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-primary)]"
             to="/intro"
           >
             Necton RD
