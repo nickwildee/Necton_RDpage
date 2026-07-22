@@ -7,11 +7,11 @@ export function IntroPage() {
   }, [])
 
   return (
-    <div className="min-h-screen min-h-svh bg-[var(--auth-background)]">
+    <div className="flex min-h-screen min-h-svh flex-col bg-[var(--auth-background)]">
       <Navigation />
       <main
         aria-label="Necton RD 인트로"
-        className="mx-auto min-h-[calc(100svh-73px)] max-w-[1200px]"
+        className="mx-auto w-full max-w-[1200px] flex-1"
       />
     </div>
   )
