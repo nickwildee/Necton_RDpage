@@ -1,6 +1,6 @@
 import { createHashRouter, Navigate } from 'react-router-dom'
 import { GuestOnly, RequireAuth } from '@features/auth'
-import { AccountPage } from '@pages/account'
+import { IntroPage } from '@pages/intro'
 import { LoginPage } from '@pages/login'
 import { SignupPage } from '@pages/signup'
 
@@ -26,11 +26,15 @@ export const router = createHashRouter([
     ),
   },
   {
-    path: '/account',
+    path: '/intro/*',
     element: (
       <RequireAuth>
-        <AccountPage />
+        <IntroPage />
       </RequireAuth>
     ),
+  },
+  {
+    path: '/account',
+    element: <Navigate to="/intro" replace />,
   },
 ])

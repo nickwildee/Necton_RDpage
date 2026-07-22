@@ -8,6 +8,7 @@ class User(models.Model):
     """회원 테이블 스키마에 대응하는 사용자 모델."""
 
     ROLE_USER = "USER"
+    ROLE_SUPER_USER = "SUPER_USER"
     STATUS_ACTIVE = "A"
 
     user_id = models.AutoField(primary_key=True)

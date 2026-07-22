@@ -10,7 +10,7 @@ export function GuestOnly({ children }: { children: ReactNode }) {
     return <AuthLoading />
   }
 
-  return user ? <Navigate to="/account" replace /> : children
+  return user ? <Navigate to="/intro" replace /> : children
 }
 
 export function RequireAuth({ children }: { children: ReactNode }) {
