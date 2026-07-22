@@ -111,8 +111,7 @@ input {
   line-height: 1.5;
 }
 
-.auth-form,
-.auth-signed-in {
+.auth-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -269,23 +268,6 @@ input {
 .auth-link:focus-visible,
 .signup-link:focus-visible {
   border-radius: 2px;
-}
-
-.auth-signed-in-label {
-  margin: 0;
-  color: var(--auth-muted);
-  font-size: 13px;
-}
-
-.auth-signed-in-email {
-  margin: -12px 0 4px;
-  overflow-wrap: anywhere;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.auth-signed-in form .auth-submit {
-  width: 100%;
 }
 
 @media (max-width: 560px) {
