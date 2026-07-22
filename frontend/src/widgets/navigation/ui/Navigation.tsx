@@ -11,7 +11,7 @@ const navigationItems = [
 function navigationLinkClass({ isActive }: { isActive: boolean }) {
   return [
     'inline-flex min-h-11 shrink-0 items-center border-b-2 px-1 text-sm font-semibold no-underline transition-colors duration-150',
-    'focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-focus)]',
+    'focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-primary)]',
     isActive
       ? 'border-[var(--auth-primary)] text-[var(--auth-primary-hover)]'
       : 'border-transparent text-[var(--auth-muted)] hover:border-[var(--auth-border)] hover:text-[var(--auth-text)]',
@@ -48,7 +48,7 @@ export function Navigation() {
       <header className="border-b border-[var(--auth-border)] bg-[var(--auth-surface)]">
         <div className="mx-auto grid min-h-[72px] max-w-[1200px] grid-cols-[auto_1fr_auto] items-center gap-x-10 px-6 max-md:grid-cols-[1fr_auto] max-md:gap-x-4 max-md:py-3 lg:px-10">
           <Link
-            className="shrink-0 text-xl font-bold tracking-[-0.01em] text-[var(--auth-text)] no-underline focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-focus)]"
+            className="shrink-0 text-xl font-bold tracking-[-0.01em] text-[var(--auth-text)] no-underline focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-primary)]"
             to="/intro"
           >
             Necton RD
@@ -86,7 +86,7 @@ export function Navigation() {
               {displayName}
             </span>
             <button
-              className="min-h-11 shrink-0 cursor-pointer rounded-lg border border-[var(--auth-border)] bg-[var(--auth-surface)] px-4 text-sm font-semibold text-[var(--auth-primary)] transition-colors duration-150 hover:border-[var(--auth-primary)] hover:bg-[var(--auth-notice-background)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--auth-focus)] disabled:cursor-wait disabled:opacity-60"
+              className="min-h-11 shrink-0 cursor-pointer rounded-lg border border-[var(--auth-border)] bg-[var(--auth-surface)] px-4 text-sm font-semibold text-[var(--auth-primary)] transition-colors duration-150 hover:border-[var(--auth-primary)] hover:bg-[var(--auth-notice-background)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--auth-primary)] disabled:cursor-wait disabled:opacity-60"
               disabled={isSubmitting}
               onClick={handleLogout}
               type="button"
