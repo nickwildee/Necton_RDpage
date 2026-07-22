@@ -10,12 +10,19 @@ Necton RD의 인증 화면과 API를 관리하는 저장소입니다. 기존 Dja
 
 두 프로젝트의 의존성, 환경변수, 실행 명령은 서로 섞지 않습니다.
 
+## 문서
+
+- [기여 가이드](CONTRIBUTING.md): Git Flow, 브랜치, 검증, PR 작성 기준
+- [아키텍처](docs/ARCHITECTURE.md): 인증 흐름, FSD 계층, DB와 배포 구조
+- [에이전트 작업 규칙](AGENTS.md): 작업 에이전트가 따라야 하는 저장소 규칙
+
 ## Backend
 
 ```bash
 conda env create -f backend/environment.yml
 conda activate necton_auth_env
 cd backend
+python manage.py check
 python manage.py test
 python manage.py runserver 127.0.0.1:8000
 ```
@@ -42,7 +49,7 @@ Node.js 24 사용을 권장합니다.
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 npm run lint
 npm run build
@@ -53,6 +60,6 @@ npm run build
 
 ## 전환 상태
 
-현재 단계는 Django JSON 인증 API와 React 로그인·회원가입 화면 연결까지입니다.
-운영용 Nginx/Gunicorn 설정은 후속 단계에서 추가합니다. 기존 EC2 서비스는 새 서비스
-검증이 끝날 때까지 그대로 유지합니다.
+현재 단계는 Django JSON 인증 API, React 로그인·회원가입 화면, 역할별 인트로
+네비게이션 연결까지입니다. 운영용 Nginx/Gunicorn 설정은 후속 단계에서 추가합니다.
+기존 EC2 서비스는 새 서비스 검증이 끝날 때까지 그대로 유지합니다.
