@@ -30,6 +30,7 @@ class AuthApiTestMixin:
         user = User(
             email=overrides.get("email", "admin@example.com"),
             nickname=overrides.get("nickname", "관리자"),
+            role=overrides.get("role", User.ROLE_USER),
             status=overrides.get("status", User.STATUS_ACTIVE),
             company_id=overrides.get("company_id", 1),
             company_name=overrides.get("company_name", "Necton"),
@@ -266,7 +267,7 @@ class SignUpApiTests(AuthApiTestMixin, TestCase):
         )
         self.assertEqual(
             set(payload["user"]),
-            {"id", "email", "nickname"},
+            {"id", "email", "nickname", "role"},
         )
 
     def test_signup_reuses_company_id_for_existing_company_name(self):
@@ -385,7 +386,10 @@ class SignUpApiTests(AuthApiTestMixin, TestCase):
 
 class LoginApiTests(AuthApiTestMixin, TestCase):
     def test_login_sets_session_flushes_old_data_and_rotates_csrf(self):
-        user = self.create_user(email="Admin@Example.com")
+        user = self.create_user(
+            email="Admin@Example.com",
+            role=User.ROLE_SUPER_USER,
+        )
         client = Client(enforce_csrf_checks=True)
         session = client.session
         session["pre_login_value"] = "remove-me"
@@ -405,7 +409,12 @@ class LoginApiTests(AuthApiTestMixin, TestCase):
         self.assertTrue(response.json()["authenticated"])
         self.assertEqual(
             response.json()["user"],
-            {"id": user.pk, "email": user.email, "nickname": user.nickname},
+            {
+                "id": user.pk,
+                "email": user.email,
+                "nickname": user.nickname,
+                "role": User.ROLE_SUPER_USER,
+            },
         )
         self.assertTrue(response.json()["csrfToken"])
         self.assertNotEqual(
@@ -504,7 +513,7 @@ class MeApiTests(AuthApiTestMixin, TestCase):
         )
 
     def test_me_returns_minimal_authenticated_user(self):
-        user = self.create_user()
+        user = self.create_user(role=User.ROLE_SUPER_USER)
         self.login(self.client, user)
 
         response = self.client.get(reverse("auth_api:me"))
@@ -518,6 +527,7 @@ class MeApiTests(AuthApiTestMixin, TestCase):
                     "id": user.pk,
                     "email": user.email,
                     "nickname": user.nickname,
+                    "role": User.ROLE_SUPER_USER,
                 },
             },
         )

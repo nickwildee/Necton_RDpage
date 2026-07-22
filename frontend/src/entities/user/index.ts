@@ -1,1 +1,1 @@
-export type { AuthUser } from './model/types'
+export type { AuthUser, UserRole } from './model/types'

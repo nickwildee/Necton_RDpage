@@ -42,7 +42,7 @@ export function LoginPage() {
     try {
       await login(fields)
       setFields((current) => ({ ...current, password: '' }))
-      navigate('/account', { replace: true })
+      navigate('/intro', { replace: true })
     } catch (error) {
       setFields((current) => ({ ...current, password: '' }))
       const result = requestError(error)

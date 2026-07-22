@@ -114,6 +114,7 @@ def _user_payload(user):
         "id": user.pk,
         "email": user.email,
         "nickname": user.nickname,
+        "role": user.role,
     }
 
 
