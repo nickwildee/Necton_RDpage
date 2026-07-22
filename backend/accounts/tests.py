@@ -15,6 +15,8 @@ class LoginPageTests(TestCase):
         user = User(
             email=overrides.get("email", "admin@example.com"),
             status=overrides.get("status", User.STATUS_ACTIVE),
+            company_id=overrides.get("company_id", 1),
+            company_name=overrides.get("company_name", "Necton"),
         )
         user.set_password(self.password)
         user.save()
@@ -184,6 +186,19 @@ class SignUpPageTests(TestCase):
         "company": "Necton",
     }
 
+    def create_user(self, **overrides):
+        user = User(
+            email=overrides.get("email", "admin@example.com"),
+            status=overrides.get("status", User.STATUS_ACTIVE),
+            company_id=overrides.get("company_id", 1),
+            company_name=overrides.get("company_name", "Necton"),
+        )
+        user.set_password(
+            overrides.get("password", "S3cure!Passphrase-7746")
+        )
+        user.save()
+        return user
+
     def test_signup_page_uses_django_template_and_separated_css(self):
         response = self.client.get(reverse("accounts:signup"))
 
@@ -221,11 +236,49 @@ class SignUpPageTests(TestCase):
         self.assertTrue(user.check_password(self.valid_signup_data["password"]))
         self.assertEqual(user.role, User.ROLE_USER)
         self.assertEqual(user.status, User.STATUS_ACTIVE)
+        self.assertEqual(user.company_id, 1)
+        self.assertEqual(user.company_name, "Necton")
         self.assertIsNotNone(user.created_date)
         self.assertIsNotNone(user.update_date)
 
+    def test_signup_reuses_company_id_for_existing_company_name(self):
+        self.create_user(
+            email="existing@example.com",
+            company_id=27,
+            company_name="Necton",
+        )
+
+        self.client.post(
+            reverse("accounts:signup"),
+            self.valid_signup_data,
+        )
+
+        user = User.objects.get(email=self.valid_signup_data["email"])
+        self.assertEqual(user.company_id, 27)
+        self.assertEqual(user.company_name, "Necton")
+
+    def test_signup_assigns_next_company_id_for_new_company_name(self):
+        self.create_user(
+            email="existing@example.com",
+            company_id=27,
+            company_name="Other Company",
+        )
+
+        self.client.post(
+            reverse("accounts:signup"),
+            self.valid_signup_data,
+        )
+
+        user = User.objects.get(email=self.valid_signup_data["email"])
+        self.assertEqual(user.company_id, 28)
+        self.assertEqual(user.company_name, "Necton")
+
     def test_signup_rejects_duplicate_email_case_insensitively(self):
-        existing_user = User(email="New-Admin@Example.com")
+        existing_user = User(
+            email="New-Admin@Example.com",
+            company_id=1,
+            company_name="Necton",
+        )
         existing_user.set_password("S3cure!ExistingPassphrase-7746")
         existing_user.save()
 
@@ -304,6 +357,16 @@ class SignUpPageTests(TestCase):
 
         self.assertRedirects(response, reverse("accounts:login"))
         self.assertIsNone(User.objects.get().phone)
+
+    def test_signup_requires_company_name(self):
+        response = self.client.post(
+            reverse("accounts:signup"),
+            self.valid_signup_data | {"company": ""},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "필수 항목입니다.")
+        self.assertFalse(User.objects.exists())
 
     def test_signup_rejects_mismatched_password_confirmation(self):
         signup_data = self.valid_signup_data | {
