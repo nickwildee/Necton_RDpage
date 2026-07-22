@@ -28,16 +28,26 @@ def required_env(name):
     return value
 
 
+def env_bool(name, default):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    raise ImproperlyConfigured(
+        f"{name} 환경변수는 true 또는 false여야 합니다."
+    )
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
+DEBUG = env_bool("DJANGO_DEBUG", True)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
@@ -89,6 +99,20 @@ AUTHENTICATION_BACKENDS = [
 
 # 기존 USER 테이블만 있는 DB에서도 별도 django_session 테이블 없이 동작한다.
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = env_bool(
+    "DJANGO_SESSION_COOKIE_SECURE",
+    not DEBUG,
+)
+CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SECURE = env_bool(
+    "DJANGO_CSRF_COOKIE_SECURE",
+    not DEBUG,
+)
+
+# React가 API 오류를 일관되게 처리할 수 있도록 /api/의 CSRF 실패만 JSON으로 반환한다.
+CSRF_FAILURE_VIEW = "accounts.api_views.csrf_failure"
 
 ROOT_URLCONF = 'config.urls'
 

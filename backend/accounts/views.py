@@ -25,6 +25,12 @@ def start_login_session(request, user):
     rotate_token(request)
 
 
+def end_login_session(request):
+    """서명 쿠키 세션과 CSRF 토큰을 함께 갱신한다."""
+    request.session.flush()
+    rotate_token(request)
+
+
 @require_http_methods(["GET", "POST"])
 def login_page(request):
     if (
@@ -74,8 +80,7 @@ def account_page(request):
 
 @require_http_methods(["POST"])
 def logout_user(request):
-    request.session.flush()
-    rotate_token(request)
+    end_login_session(request)
     messages.success(request, "로그아웃되었습니다.")
     return redirect("accounts:login")
 
