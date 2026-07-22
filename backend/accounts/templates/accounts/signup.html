@@ -153,6 +153,7 @@
             placeholder="회사명을 입력하세요"
             autocomplete="organization"
             maxlength="255"
+            required
             {% if form.company.errors %}aria-invalid="true" aria-describedby="company-error"{% endif %}
           >
           {% if form.company.errors %}

@@ -541,6 +541,7 @@ function App() {
                 placeholder="회사명을 입력하세요"
                 autoComplete="organization"
                 maxLength={255}
+                required
                 aria-invalid={signupErrors.company ? true : undefined}
                 aria-describedby={signupErrors.company ? 'signup-company-error' : undefined}
               />

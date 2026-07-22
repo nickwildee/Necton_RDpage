@@ -31,6 +31,8 @@ class AuthApiTestMixin:
             email=overrides.get("email", "admin@example.com"),
             nickname=overrides.get("nickname", "관리자"),
             status=overrides.get("status", User.STATUS_ACTIVE),
+            company_id=overrides.get("company_id", 1),
+            company_name=overrides.get("company_name", "Necton"),
         )
         user.set_password(overrides.get("password", self.password))
         user.save()
@@ -253,7 +255,8 @@ class SignUpApiTests(AuthApiTestMixin, TestCase):
         self.assertEqual(user.status, User.STATUS_ACTIVE)
         self.assertNotEqual(user.pk, 9999)
         self.assertEqual(user.phone, "01012345678")
-        self.assertEqual(user.company, "Necton")
+        self.assertEqual(user.company_id, 1)
+        self.assertEqual(user.company_name, "Necton")
         self.assertNotIn(SESSION_KEY, self.client.session)
 
         payload = response.json()
@@ -265,6 +268,42 @@ class SignUpApiTests(AuthApiTestMixin, TestCase):
             set(payload["user"]),
             {"id", "email", "nickname"},
         )
+
+    def test_signup_reuses_company_id_for_existing_company_name(self):
+        self.create_user(
+            email="existing@example.com",
+            company_id=27,
+            company_name="Necton",
+        )
+
+        response = self.post_json(
+            self.client,
+            reverse("auth_api:signup"),
+            self.signup_data,
+        )
+
+        self.assertEqual(response.status_code, 201)
+        user = User.objects.get(email=self.signup_data["email"])
+        self.assertEqual(user.company_id, 27)
+        self.assertEqual(user.company_name, "Necton")
+
+    def test_signup_assigns_next_company_id_for_new_company_name(self):
+        self.create_user(
+            email="existing@example.com",
+            company_id=27,
+            company_name="Other Company",
+        )
+
+        response = self.post_json(
+            self.client,
+            reverse("auth_api:signup"),
+            self.signup_data,
+        )
+
+        self.assertEqual(response.status_code, 201)
+        user = User.objects.get(email=self.signup_data["email"])
+        self.assertEqual(user.company_id, 28)
+        self.assertEqual(user.company_name, "Necton")
 
     def test_signup_returns_field_errors_for_invalid_input(self):
         response = self.post_json(
