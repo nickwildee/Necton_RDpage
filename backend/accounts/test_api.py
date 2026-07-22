@@ -388,7 +388,7 @@ class LoginApiTests(AuthApiTestMixin, TestCase):
     def test_login_sets_session_flushes_old_data_and_rotates_csrf(self):
         user = self.create_user(
             email="Admin@Example.com",
-            role=User.ROLE_SUPER_USER,
+            role=User.ROLE_SUPER_ADMIN,
         )
         client = Client(enforce_csrf_checks=True)
         session = client.session
@@ -413,7 +413,7 @@ class LoginApiTests(AuthApiTestMixin, TestCase):
                 "id": user.pk,
                 "email": user.email,
                 "nickname": user.nickname,
-                "role": User.ROLE_SUPER_USER,
+                "role": User.ROLE_SUPER_ADMIN,
             },
         )
         self.assertTrue(response.json()["csrfToken"])
@@ -513,7 +513,7 @@ class MeApiTests(AuthApiTestMixin, TestCase):
         )
 
     def test_me_returns_minimal_authenticated_user(self):
-        user = self.create_user(role=User.ROLE_SUPER_USER)
+        user = self.create_user(role=User.ROLE_SUPER_ADMIN)
         self.login(self.client, user)
 
         response = self.client.get(reverse("auth_api:me"))
@@ -527,7 +527,7 @@ class MeApiTests(AuthApiTestMixin, TestCase):
                     "id": user.pk,
                     "email": user.email,
                     "nickname": user.nickname,
-                    "role": User.ROLE_SUPER_USER,
+                    "role": User.ROLE_SUPER_ADMIN,
                 },
             },
         )
