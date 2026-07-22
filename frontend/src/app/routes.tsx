@@ -1,14 +1,36 @@
-import { createBrowserRouter } from 'react-router-dom'
-import { HomePage } from '@pages/home'
-import { ClassifierPage } from '@pages/classifier'
+import { createHashRouter, Navigate } from 'react-router-dom'
+import { GuestOnly, RequireAuth } from '@features/auth'
+import { AccountPage } from '@pages/account'
+import { LoginPage } from '@pages/login'
+import { SignupPage } from '@pages/signup'
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: <Navigate to="/login" replace />,
   },
   {
-    path: '/classifier',
-    element: <ClassifierPage />,
+    path: '/login',
+    element: (
+      <GuestOnly>
+        <LoginPage />
+      </GuestOnly>
+    ),
+  },
+  {
+    path: '/signup',
+    element: (
+      <GuestOnly>
+        <SignupPage />
+      </GuestOnly>
+    ),
+  },
+  {
+    path: '/account',
+    element: (
+      <RequireAuth>
+        <AccountPage />
+      </RequireAuth>
+    ),
   },
 ])
