@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ErrorMessages } from '@shared/ui'
 import { useSignupForm } from '../model/useSignupForm'
+import { authInputClassName, authStyles } from './authStyles'
 
 export function SignupForm() {
   const {
@@ -13,36 +14,39 @@ export function SignupForm() {
   } = useSignupForm()
 
   return (
-    <section className="signup-card" aria-labelledby="signup-title">
-      <header className="signup-header">
-        <h1 className="signup-title" id="signup-title">
+    <section className={authStyles.card} aria-labelledby="signup-title">
+      <header className={authStyles.header}>
+        <h1 className={authStyles.title} id="signup-title">
           Necton RD
         </h1>
-        <p className="signup-subtitle">새 계정을 생성해 주세요</p>
+        <p className={authStyles.subtitle}>새 계정을 생성해 주세요</p>
       </header>
 
       {globalError && (
-        <div className="signup-form-errors" role="alert">
-          <p>{globalError}</p>
+        <div className={authStyles.formErrors} role="alert">
+          <p className={authStyles.error}>{globalError}</p>
         </div>
       )}
 
       {errors.non_field_errors && (
-        <div className="signup-form-errors" role="alert">
+        <div className={authStyles.formErrors} role="alert">
           <ErrorMessages
             messages={errors.non_field_errors}
-            className="signup-error"
+            className={authStyles.error}
           />
         </div>
       )}
 
-      <form className="signup-form" onSubmit={handleSubmit}>
-        <div className="signup-field">
-          <label className="signup-label" htmlFor="signup-email">
-            이메일 <span className="signup-required" aria-hidden="true">*</span>
+      <form className={authStyles.signupForm} onSubmit={handleSubmit}>
+        <div className={authStyles.field}>
+          <label className={authStyles.label} htmlFor="signup-email">
+            이메일{' '}
+            <span className={authStyles.required} aria-hidden="true">
+              *
+            </span>
           </label>
           <input
-            className={`signup-input${errors.email ? ' signup-input--error' : ''}`}
+            className={authInputClassName(Boolean(errors.email))}
             id="signup-email"
             name="email"
             type="email"
@@ -59,16 +63,19 @@ export function SignupForm() {
           <ErrorMessages
             id="signup-email-error"
             messages={errors.email}
-            className="signup-error"
+            className={authStyles.error}
           />
         </div>
 
-        <div className="signup-field">
-          <label className="signup-label" htmlFor="signup-password">
-            비밀번호 <span className="signup-required" aria-hidden="true">*</span>
+        <div className={authStyles.field}>
+          <label className={authStyles.label} htmlFor="signup-password">
+            비밀번호{' '}
+            <span className={authStyles.required} aria-hidden="true">
+              *
+            </span>
           </label>
           <input
-            className={`signup-input${errors.password ? ' signup-input--error' : ''}`}
+            className={authInputClassName(Boolean(errors.password))}
             id="signup-password"
             name="password"
             type="password"
@@ -87,17 +94,19 @@ export function SignupForm() {
           <ErrorMessages
             id="signup-password-error"
             messages={errors.password}
-            className="signup-error"
+            className={authStyles.error}
           />
         </div>
 
-        <div className="signup-field">
-          <label className="signup-label" htmlFor="signup-password-confirm">
+        <div className={authStyles.field}>
+          <label className={authStyles.label} htmlFor="signup-password-confirm">
             비밀번호 확인{' '}
-            <span className="signup-required" aria-hidden="true">*</span>
+            <span className={authStyles.required} aria-hidden="true">
+              *
+            </span>
           </label>
           <input
-            className={`signup-input${errors.password_confirm ? ' signup-input--error' : ''}`}
+            className={authInputClassName(Boolean(errors.password_confirm))}
             id="signup-password-confirm"
             name="password_confirm"
             type="password"
@@ -118,16 +127,16 @@ export function SignupForm() {
           <ErrorMessages
             id="signup-password-confirm-error"
             messages={errors.password_confirm}
-            className="signup-error"
+            className={authStyles.error}
           />
         </div>
 
-        <div className="signup-field">
-          <label className="signup-label" htmlFor="signup-nickname">
+        <div className={authStyles.field}>
+          <label className={authStyles.label} htmlFor="signup-nickname">
             닉네임
           </label>
           <input
-            className={`signup-input${errors.nickname ? ' signup-input--error' : ''}`}
+            className={authInputClassName(Boolean(errors.nickname))}
             id="signup-nickname"
             name="nickname"
             type="text"
@@ -144,16 +153,16 @@ export function SignupForm() {
           <ErrorMessages
             id="signup-nickname-error"
             messages={errors.nickname}
-            className="signup-error"
+            className={authStyles.error}
           />
         </div>
 
-        <div className="signup-field">
-          <label className="signup-label" htmlFor="signup-phone">
+        <div className={authStyles.field}>
+          <label className={authStyles.label} htmlFor="signup-phone">
             핸드폰 번호
           </label>
           <input
-            className={`signup-input${errors.phone ? ' signup-input--error' : ''}`}
+            className={authInputClassName(Boolean(errors.phone))}
             id="signup-phone"
             name="phone"
             type="tel"
@@ -171,16 +180,16 @@ export function SignupForm() {
           <ErrorMessages
             id="signup-phone-error"
             messages={errors.phone}
-            className="signup-error"
+            className={authStyles.error}
           />
         </div>
 
-        <div className="signup-field">
-          <label className="signup-label" htmlFor="signup-company">
+        <div className={authStyles.field}>
+          <label className={authStyles.label} htmlFor="signup-company">
             회사명
           </label>
           <input
-            className={`signup-input${errors.company ? ' signup-input--error' : ''}`}
+            className={authInputClassName(Boolean(errors.company))}
             id="signup-company"
             name="company"
             type="text"
@@ -198,17 +207,21 @@ export function SignupForm() {
           <ErrorMessages
             id="signup-company-error"
             messages={errors.company}
-            className="signup-error"
+            className={authStyles.error}
           />
         </div>
 
-        <button className="signup-submit" type="submit" disabled={isSubmitting}>
+        <button
+          className={authStyles.submit}
+          type="submit"
+          disabled={isSubmitting}
+        >
           가입하기
         </button>
 
-        <p className="signup-switch">
+        <p className={authStyles.switchText}>
           이미 계정이 있으신가요?
-          <Link className="signup-link" to="/login">
+          <Link className={authStyles.link} to="/login">
             로그인
           </Link>
         </p>

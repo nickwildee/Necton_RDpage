@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { SignupForm } from '@features/auth'
+import { AuthLayout, SignupForm } from '@features/auth'
 
 export function SignupPage() {
   useEffect(() => {
@@ -7,8 +7,8 @@ export function SignupPage() {
   }, [])
 
   return (
-    <main className="signup-page">
+    <AuthLayout>
       <SignupForm />
-    </main>
+    </AuthLayout>
   )
 }
