@@ -47,10 +47,14 @@ export function FeatureListPanel<T extends FeatureListItem>({
     }
 
     const selectedElement = itemRefs.current.get(selectedId)
-    if (selectedElement) {
+    const activeElement = document.activeElement
+    const canAutoFocus =
+      activeElement === null || activeElement === document.body
+
+    if (selectedElement && canAutoFocus) {
       selectedElement.focus({ preventScroll: true })
-      hasAutoFocused.current = true
     }
+    hasAutoFocused.current = true
   }, [autoFocusSelected, selectedId])
 
   const selectAndFocus = (item: T) => {
@@ -161,11 +165,6 @@ export function FeatureListPanel<T extends FeatureListItem>({
                       itemRefs.current.delete(item.id)
                     }
                   }}
-                  tabIndex={
-                    isSelected || (selectedId === null && index === 0)
-                      ? 0
-                      : -1
-                  }
                   type="button"
                 >
                   <span className="w-full truncate text-[13px] leading-[1.35] font-bold text-[var(--auth-text)]">
@@ -179,7 +178,6 @@ export function FeatureListPanel<T extends FeatureListItem>({
                   aria-label={`${item.feature} 수정`}
                   className="absolute top-3 right-2.5 cursor-pointer border-0 bg-transparent px-1 py-1 text-[11px] font-bold text-[var(--auth-primary)] hover:underline"
                   onClick={() => onEdit(item)}
-                  tabIndex={isSelected ? 0 : -1}
                   type="button"
                 >
                   수정
