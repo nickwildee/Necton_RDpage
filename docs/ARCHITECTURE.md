@@ -67,6 +67,13 @@ POST와 PATCH 요청은 `Content-Type: application/json`과 `X-CSRFToken` 헤더
 필요합니다. 비밀번호 변경 후에도 현재 세션은 유지됩니다. API 오류는 `detail`과
 선택적인 필드별 `errors`를 JSON으로 반환합니다.
 
+### 문서 특성 관리 API
+
+`/api/settings/feature-groups/`, `/api/settings/feature-types/`,
+`/api/settings/feature-values/`에서 대·중·소분류를 관리합니다. 모든 조회와
+변경 요청은 로그인한 `SUPER_ADMIN`만 사용할 수 있고, 변경 요청에는 인증 API와
+같은 CSRF 헤더가 필요합니다. 소분류 목록은 페이지당 8개를 반환합니다.
+
 ## 사용자와 역할
 
 Django `User` 모델은 새 테이블을 만들지 않고 기존 MariaDB `USER` 테이블에
@@ -94,8 +101,7 @@ USER
 - `ORG_USER`
 - `USER`
 
-현재 설정 메뉴는 `SUPER_ADMIN`에게만 표시됩니다. 메뉴를 숨기는 것은 접근 제어가
-아니므로 설정 API가 추가될 때는 Django에서도 `SUPER_ADMIN` 권한을 검사해야 합니다.
+설정 메뉴는 `SUPER_ADMIN`에게만 표시되며 Django 설정 API도 같은 역할을 검사합니다.
 
 회원가입 시 같은 `company_name`이 이미 있으면 기존 `company_id`를 재사용합니다.
 없으면 현재 최댓값 다음 번호를 생성합니다. 이 방식은 기존 스키마 호환을 위한 현재
