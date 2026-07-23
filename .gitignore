@@ -13,3 +13,4 @@ dist/
 .vite/
 coverage/
 *.log
+.gstack/
