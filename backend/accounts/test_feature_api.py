@@ -273,7 +273,7 @@ class FeatureManagementApiTests(TransactionTestCase):
                 "groupId": group.pk,
                 "feature": "Security Document",
                 "description": "보안 문서",
-                "note": "",
+                "note": None,
             },
             csrf_token=csrf_token,
         )
@@ -298,7 +298,7 @@ class FeatureManagementApiTests(TransactionTestCase):
             {
                 "typeId": feature_type.pk,
                 "feature": "국가안보계획",
-                "description": "국가안보 정책 및 대응 계획",
+                "description": None,
                 "cWeight": 100,
                 "sWeight": 20,
                 "oWeight": 0,
@@ -316,6 +316,7 @@ class FeatureManagementApiTests(TransactionTestCase):
             feature_value.feature_type_name,
             feature_type.feature,
         )
+        self.assertIsNone(feature_value.description)
 
     def test_value_list_is_paginated_eight_at_a_time(self):
         group = self.create_group()

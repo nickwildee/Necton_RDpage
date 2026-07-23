@@ -73,6 +73,8 @@ def _text_value(
         return None, None
 
     value = payload[key]
+    if value is None and not required:
+        return None, None
     if not isinstance(value, str):
         return MISSING, f"{label}은(는) 문자열이어야 합니다."
 

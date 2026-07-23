@@ -24,9 +24,8 @@ class Migration(migrations.Migration):
                     models.CharField(blank=True, max_length=255, null=True),
                 ),
                 ("role", models.CharField(default="USER", max_length=11)),
-                ("company_id", models.IntegerField()),
                 (
-                    "company_name",
+                    "company",
                     models.CharField(blank=True, max_length=255, null=True),
                 ),
                 ("status", models.CharField(default="A", max_length=1)),
