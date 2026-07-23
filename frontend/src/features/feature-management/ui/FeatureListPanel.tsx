@@ -1,3 +1,6 @@
+import { useEffect, useRef } from 'react'
+import type { KeyboardEvent } from 'react'
+
 type FeatureListItem = {
   id: number
   feature: string
@@ -15,6 +18,8 @@ export function FeatureListPanel<T extends FeatureListItem>({
   onAdd,
   onSelect,
   onEdit,
+  autoFocusSelected = false,
+  hasLeadingDivider = false,
 }: {
   title: string
   items: T[]
@@ -26,9 +31,79 @@ export function FeatureListPanel<T extends FeatureListItem>({
   onAdd: () => void
   onSelect: (id: number) => void
   onEdit: (item: T) => void
+  autoFocusSelected?: boolean
+  hasLeadingDivider?: boolean
 }) {
+  const itemRefs = useRef(new Map<number, HTMLButtonElement>())
+  const hasAutoFocused = useRef(false)
+
+  useEffect(() => {
+    if (
+      !autoFocusSelected ||
+      hasAutoFocused.current ||
+      selectedId === null
+    ) {
+      return
+    }
+
+    const selectedElement = itemRefs.current.get(selectedId)
+    if (selectedElement) {
+      selectedElement.focus({ preventScroll: true })
+      hasAutoFocused.current = true
+    }
+  }, [autoFocusSelected, selectedId])
+
+  const selectAndFocus = (item: T) => {
+    onSelect(item.id)
+    itemRefs.current.get(item.id)?.focus({ preventScroll: true })
+  }
+
+  const handleItemKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
+    const navigationKeys = [
+      'ArrowDown',
+      'ArrowUp',
+      'Home',
+      'End',
+    ]
+    if (!navigationKeys.includes(event.key)) {
+      return
+    }
+
+    event.preventDefault()
+    let nextIndex: number | null = null
+
+    if (event.key === 'ArrowDown') {
+      nextIndex = Math.min(index + 1, items.length - 1)
+    }
+    if (event.key === 'ArrowUp') {
+      nextIndex = Math.max(index - 1, 0)
+    }
+    if (event.key === 'Home') {
+      nextIndex = 0
+    }
+    if (event.key === 'End') {
+      nextIndex = items.length - 1
+    }
+
+    if (nextIndex === null || nextIndex === index) {
+      return
+    }
+
+    selectAndFocus(items[nextIndex])
+  }
+
   return (
-    <section className="flex min-w-0 flex-col bg-[var(--auth-surface)] lg:min-h-[636px] lg:[&+section]:border-l lg:[&+section]:border-[var(--auth-border)] max-lg:[&+section]:border-t max-lg:[&+section]:border-[var(--auth-border)]">
+    <section
+      className={[
+        'flex min-w-0 flex-col bg-[var(--auth-surface)] xl:min-h-[636px]',
+        hasLeadingDivider
+          ? 'border-t border-[var(--auth-border)] lg:border-t-0 lg:border-l'
+          : '',
+      ].join(' ')}
+    >
       <header className="flex min-h-[76px] items-center justify-between gap-3 border-b border-[var(--auth-border)] px-5">
         <div className="flex items-center gap-2">
           <h2 className="m-0 text-base font-bold tracking-[-0.01em]">
@@ -60,7 +135,7 @@ export function FeatureListPanel<T extends FeatureListItem>({
           </li>
         )}
         {!isLoading &&
-          items.map((item) => {
+          items.map((item, index) => {
             const isSelected = selectedId === item.id
             return (
               <li
@@ -74,8 +149,23 @@ export function FeatureListPanel<T extends FeatureListItem>({
               >
                 <button
                   aria-current={isSelected ? 'true' : undefined}
-                  className="flex min-h-[74px] w-full cursor-pointer flex-col justify-center border-0 bg-transparent px-3.5 py-3 pr-14 text-left"
+                  className="flex min-h-[74px] w-full cursor-pointer flex-col justify-center border-0 bg-transparent px-3.5 py-3 pr-14 text-left focus-visible:rounded-lg focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--auth-primary)]"
                   onClick={() => onSelect(item.id)}
+                  onKeyDown={(event) =>
+                    handleItemKeyDown(event, index)
+                  }
+                  ref={(element) => {
+                    if (element) {
+                      itemRefs.current.set(item.id, element)
+                    } else {
+                      itemRefs.current.delete(item.id)
+                    }
+                  }}
+                  tabIndex={
+                    isSelected || (selectedId === null && index === 0)
+                      ? 0
+                      : -1
+                  }
                   type="button"
                 >
                   <span className="w-full truncate text-[13px] leading-[1.35] font-bold text-[var(--auth-text)]">
@@ -86,8 +176,10 @@ export function FeatureListPanel<T extends FeatureListItem>({
                   </span>
                 </button>
                 <button
+                  aria-label={`${item.feature} 수정`}
                   className="absolute top-3 right-2.5 cursor-pointer border-0 bg-transparent px-1 py-1 text-[11px] font-bold text-[var(--auth-primary)] hover:underline"
                   onClick={() => onEdit(item)}
+                  tabIndex={isSelected ? 0 : -1}
                   type="button"
                 >
                   수정

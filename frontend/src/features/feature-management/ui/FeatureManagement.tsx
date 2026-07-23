@@ -68,8 +68,9 @@ export function FeatureManagement() {
         </p>
       )}
 
-      <div className="grid min-h-[636px] overflow-hidden rounded-xl border border-[var(--auth-border)] bg-[var(--auth-surface)] shadow-[0_2px_20px_rgb(32_39_52_/_7%)] lg:grid-cols-[270px_300px_minmax(0,1fr)]">
+      <div className="grid min-h-[636px] overflow-hidden rounded-xl border border-[var(--auth-border)] bg-[var(--auth-surface)] shadow-[0_2px_20px_rgb(32_39_52_/_7%)] lg:grid-cols-2 xl:grid-cols-[230px_260px_minmax(0,1fr)]">
         <FeatureListPanel
+          autoFocusSelected
           emptyText="등록된 대분류가 없습니다."
           footerText="대분류를 선택하면 중분류가 표시됩니다."
           isLoading={isLoadingGroups}
@@ -88,6 +89,7 @@ export function FeatureManagement() {
               : '대분류를 선택해 주세요.'
           }
           footerText="중분류를 선택하면 소분류가 표시됩니다."
+          hasLeadingDivider
           isLoading={isLoadingTypes}
           items={types}
           onAdd={() => openEditor('type', 'create')}
