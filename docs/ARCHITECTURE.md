@@ -76,8 +76,8 @@ POST와 PATCH 요청은 `Content-Type: application/json`과 `X-CSRFToken` 헤더
 
 ## 사용자와 역할
 
-Django `User` 모델은 새 테이블을 만들지 않고 기존 MariaDB `USER` 테이블에
-매핑됩니다.
+Django `User` 모델은 MariaDB `USER` 테이블에 매핑됩니다. 기존 환경에서는 같은
+테이블을 재사용하고, 새 데이터베이스에서는 Django 마이그레이션이 테이블을 생성합니다.
 
 ```text
 USER
