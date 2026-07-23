@@ -213,7 +213,7 @@ export function useFeatureManagement() {
     return () => {
       active = false
     }
-  }, [page, selectedTypeId, valueRevision])
+  }, [page, selectedTypeId, typeRevision, valueRevision])
 
   const selectedGroup = useMemo(
     () => groups.find((group) => group.id === selectedGroupId) ?? null,
