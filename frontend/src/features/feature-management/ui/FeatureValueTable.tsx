@@ -52,7 +52,7 @@ export function FeatureValueTable({
   )
 
   return (
-    <section className="flex min-w-0 flex-col bg-[var(--auth-surface)] lg:min-h-[636px] lg:border-l lg:border-[var(--auth-border)] max-lg:border-t max-lg:border-[var(--auth-border)]">
+    <section className="col-span-1 flex min-w-0 flex-col border-t border-[var(--auth-border)] bg-[var(--auth-surface)] lg:col-span-2 xl:col-span-1 xl:min-h-[636px] xl:border-t-0 xl:border-l">
       <header className="flex min-h-[76px] items-center justify-between gap-3 border-b border-[var(--auth-border)] px-[18px]">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -88,7 +88,9 @@ export function FeatureValueTable({
               <th className="w-[7%] text-center">C</th>
               <th className="w-[7%] text-center">S</th>
               <th className="w-[7%] text-center">O</th>
-              <th className="w-[18%] text-right">관리</th>
+              <th className="sticky right-0 z-10 w-[18%] border-l border-[var(--auth-border)] bg-[var(--auth-surface)] pl-3 text-right">
+                관리
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -139,17 +141,17 @@ export function FeatureValueTable({
                   <td className="text-center">
                     <Weight value={value.oWeight} />
                   </td>
-                  <td className="text-right">
-                    <span className="inline-flex items-center gap-2">
+                  <td className="sticky right-0 z-10 border-l border-[#eceef1] bg-[var(--auth-surface)] pl-3 text-right">
+                    <span className="inline-flex items-center gap-1">
                       <button
-                        className="cursor-pointer border-0 bg-transparent p-0 text-[11px] font-bold text-[var(--auth-primary)] hover:underline"
+                        className="min-h-9 cursor-pointer border-0 bg-transparent px-1.5 text-[11px] font-bold whitespace-nowrap text-[var(--auth-primary)] hover:underline"
                         onClick={() => onEdit(value)}
                         type="button"
                       >
                         수정
                       </button>
                       <button
-                        className="cursor-pointer border-0 bg-transparent p-0 text-[11px] font-bold text-[var(--auth-error)] hover:underline"
+                        className="min-h-9 cursor-pointer border-0 bg-transparent px-1.5 text-[11px] font-bold whitespace-nowrap text-[var(--auth-error)] hover:underline"
                         onClick={() => onDelete(value)}
                         type="button"
                       >

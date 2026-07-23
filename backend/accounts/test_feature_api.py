@@ -317,10 +317,10 @@ class FeatureManagementApiTests(TransactionTestCase):
             feature_type.feature,
         )
 
-    def test_value_list_is_paginated_six_at_a_time(self):
+    def test_value_list_is_paginated_eight_at_a_time(self):
         group = self.create_group()
         feature_type = self.create_type(group)
-        for index in range(7):
+        for index in range(9):
             self.create_value(
                 group,
                 feature_type,
@@ -333,14 +333,14 @@ class FeatureManagementApiTests(TransactionTestCase):
         first_page = client.get(url, {"typeId": feature_type.pk, "page": 1})
         second_page = client.get(url, {"typeId": feature_type.pk, "page": 2})
 
-        self.assertEqual(len(first_page.json()["items"]), 6)
+        self.assertEqual(len(first_page.json()["items"]), 8)
         self.assertEqual(len(second_page.json()["items"]), 1)
         self.assertEqual(
             first_page.json()["pagination"],
             {
                 "page": 1,
-                "pageSize": 6,
-                "totalItems": 7,
+                "pageSize": 8,
+                "totalItems": 9,
                 "totalPages": 2,
             },
         )
