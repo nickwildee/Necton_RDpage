@@ -38,6 +38,8 @@ MariaDB/RDS를 사용할 때는 `backend/.env.example`을 참고해 환경변수
 - `POST /api/auth/login/`: 로그인 및 세션 생성
 - `POST /api/auth/logout/`: 로그아웃 및 세션 제거
 - `GET /api/auth/me/`: 현재 로그인 상태 확인
+- `PATCH /api/auth/profile/`: 로그인 사용자의 닉네임 변경
+- `POST /api/auth/password/`: 현재 비밀번호 확인 후 비밀번호 변경
 
 변경 요청은 JSON 본문과 `X-CSRFToken` 헤더를 사용합니다. 프런트엔드는 먼저 CSRF
 엔드포인트를 호출한 뒤 같은 도메인의 Django 세션 쿠키를 함께 전송합니다. JWT나

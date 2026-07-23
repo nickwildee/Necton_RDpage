@@ -29,3 +29,22 @@ export type SignupFields = {
   phone: string
   company: string
 }
+
+export type NicknameFields = {
+  nickname: string
+}
+
+export type PasswordChangeFields = {
+  current_password: string
+  new_password: string
+  new_password_confirm: string
+}
+
+export type ProfileResponse = {
+  detail: string
+  user: AuthUser
+}
+
+export type DetailResponse = {
+  detail: string
+}

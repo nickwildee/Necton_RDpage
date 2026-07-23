@@ -26,7 +26,7 @@ export function useNavigation() {
   }
 
   return {
-    displayName: user?.nickname?.trim() || user?.email || '사용자',
+    nickname: user?.nickname?.trim() || null,
     email: user?.email,
     isSuperAdmin: user?.role === 'SUPER_ADMIN',
     globalError,

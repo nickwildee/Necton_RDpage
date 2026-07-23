@@ -9,7 +9,7 @@
 ```text
 Browser
   │
-  ├─ /login, /signup, /intro/* ──> React + Vite
+  ├─ /login, /signup, /intro/*, /intro/profile ──> React + Vite
   │                                  │
   │                                  └─ relative /api/*
   │                                             │
@@ -60,9 +60,12 @@ session backend를 사용하므로 기존 DB에 `django_session` 테이블이 �
 | `POST` | `/api/auth/login/` | 인증 후 세션 생성 |
 | `POST` | `/api/auth/logout/` | 세션 제거 |
 | `GET` | `/api/auth/me/` | 현재 인증 상태와 사용자 반환 |
+| `PATCH` | `/api/auth/profile/` | 현재 사용자의 닉네임 변경 |
+| `POST` | `/api/auth/password/` | 현재 비밀번호 확인 후 비밀번호 변경 |
 
-POST 요청은 `Content-Type: application/json`과 `X-CSRFToken` 헤더가 필요합니다.
-API 오류는 `detail`과 선택적인 필드별 `errors`를 JSON으로 반환합니다.
+POST와 PATCH 요청은 `Content-Type: application/json`과 `X-CSRFToken` 헤더가
+필요합니다. 비밀번호 변경 후에도 현재 세션은 유지됩니다. API 오류는 `detail`과
+선택적인 필드별 `errors`를 JSON으로 반환합니다.
 
 ## 사용자와 역할
 

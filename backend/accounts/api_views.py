@@ -1,7 +1,7 @@
 import json
 from functools import wraps
 
-from django.contrib.auth import SESSION_KEY
+from django.contrib.auth import SESSION_KEY, update_session_auth_hash
 from django.core.exceptions import NON_FIELD_ERRORS, RequestDataTooBig
 from django.db import IntegrityError, OperationalError, transaction
 from django.http import JsonResponse, UnreadablePostError
@@ -9,7 +9,12 @@ from django.middleware.csrf import get_token
 from django.views.csrf import csrf_failure as default_csrf_failure
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from .forms import LoginForm, SignUpForm
+from .forms import (
+    LoginForm,
+    NicknameForm,
+    PasswordChangeForm,
+    SignUpForm,
+)
 from .views import end_login_session, start_login_session
 
 DATABASE_UNAVAILABLE_MESSAGE = (
@@ -55,6 +60,22 @@ def _api_methods(*allowed_methods):
         return wrapped
 
     return decorator
+
+
+def _authenticated_required(view_func):
+    @wraps(view_func)
+    def wrapped(request, *args, **kwargs):
+        try:
+            user = request.user
+            is_authenticated = user.is_authenticated
+        except OperationalError:
+            return _database_unavailable_response()
+
+        if not is_authenticated:
+            return _error_response("로그인이 필요합니다.", status=401)
+        return view_func(request, *args, **kwargs)
+
+    return wrapped
 
 
 def _read_json_object(request):
@@ -229,6 +250,62 @@ def me(request):
             "user": _user_payload(user),
         }
     )
+
+
+@_api_methods("PATCH")
+@_authenticated_required
+def profile(request):
+    payload, error_response = _read_json_object(request)
+    if error_response:
+        return error_response
+
+    form = NicknameForm(payload)
+    if not form.is_valid():
+        return _error_response(
+            "입력값을 확인해 주세요.",
+            status=400,
+            errors=_form_errors(form),
+        )
+
+    user = request.user
+    user.nickname = form.cleaned_data["nickname"]
+    try:
+        user.save(update_fields=["nickname", "update_date"])
+    except OperationalError:
+        return _database_unavailable_response()
+
+    return _json_response(
+        {
+            "detail": "닉네임이 변경되었습니다.",
+            "user": _user_payload(user),
+        }
+    )
+
+
+@_api_methods("POST")
+@_authenticated_required
+def password(request):
+    payload, error_response = _read_json_object(request)
+    if error_response:
+        return error_response
+
+    user = request.user
+    form = PasswordChangeForm(payload, user=user)
+    if not form.is_valid():
+        return _error_response(
+            "입력값을 확인해 주세요.",
+            status=400,
+            errors=_form_errors(form),
+        )
+
+    user.set_password(form.cleaned_data["new_password"])
+    try:
+        user.save(update_fields=["password", "update_date"])
+    except OperationalError:
+        return _database_unavailable_response()
+
+    update_session_auth_hash(request, user)
+    return _json_response({"detail": "비밀번호가 변경되었습니다."})
 
 
 def api_not_found(request, *args, **kwargs):

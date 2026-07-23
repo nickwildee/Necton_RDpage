@@ -3,15 +3,21 @@ import type { ReactNode } from 'react'
 import type { AuthUser } from '@entities/user'
 import { ApiError } from '@shared/api'
 import {
+  changePassword,
   fetchCsrfToken,
   fetchSession,
   login,
   logout,
   signup,
+  updateNickname,
 } from '../api/auth'
 import type {
+  DetailResponse,
   LoginFields,
   LoginResponse,
+  NicknameFields,
+  PasswordChangeFields,
+  ProfileResponse,
   SignupFields,
   SignupResponse,
 } from './types'
@@ -104,6 +110,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCsrfToken(response.csrfToken)
   }
 
+  const updateNicknameUser = async (fields: NicknameFields) => {
+    const response = await requestWithCsrf<ProfileResponse>((token) =>
+      updateNickname(fields, token),
+    )
+    setUser(response.user)
+    return response
+  }
+
+  const changePasswordUser = (fields: PasswordChangeFields) =>
+    requestWithCsrf<DetailResponse>((token) =>
+      changePassword(fields, token),
+    )
+
   return (
     <AuthContext.Provider
       value={{
@@ -114,6 +133,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login: loginUser,
         signup: signupUser,
         logout: logoutUser,
+        updateNickname: updateNicknameUser,
+        changePassword: changePasswordUser,
       }}
     >
       {children}

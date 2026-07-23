@@ -10,6 +10,8 @@ urlpatterns = [
     path("auth/login/", api_views.login, name="login"),
     path("auth/logout/", api_views.logout, name="logout"),
     path("auth/me/", api_views.me, name="me"),
+    path("auth/profile/", api_views.profile, name="profile"),
+    path("auth/password/", api_views.password, name="password"),
     path(
         "settings/feature-groups/",
         feature_api_views.feature_groups,
