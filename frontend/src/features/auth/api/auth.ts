@@ -1,8 +1,12 @@
 import { apiRequest } from '@shared/api'
 import type {
   CsrfResponse,
+  DetailResponse,
   LoginFields,
   LoginResponse,
+  NicknameFields,
+  PasswordChangeFields,
+  ProfileResponse,
   SessionResponse,
   SignupFields,
   SignupResponse,
@@ -37,4 +41,29 @@ export function signup(fields: SignupFields, csrfToken: string) {
 
 export function logout(csrfToken: string) {
   return postJson<LoginResponse>('/api/auth/logout/', {}, csrfToken)
+}
+
+export function updateNickname(
+  fields: NicknameFields,
+  csrfToken: string,
+) {
+  return apiRequest<ProfileResponse>('/api/auth/profile/', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken,
+    },
+    body: JSON.stringify(fields),
+  })
+}
+
+export function changePassword(
+  fields: PasswordChangeFields,
+  csrfToken: string,
+) {
+  return postJson<DetailResponse>(
+    '/api/auth/password/',
+    fields,
+    csrfToken,
+  )
 }

@@ -44,6 +44,69 @@ class LoginForm(forms.Form):
         return self.user_cache
 
 
+class NicknameForm(forms.Form):
+    nickname = forms.CharField(
+        label="닉네임",
+        required=False,
+        max_length=255,
+    )
+
+    def clean_nickname(self):
+        return self.cleaned_data["nickname"].strip() or None
+
+
+class PasswordChangeForm(forms.Form):
+    current_password = forms.CharField(
+        label="현재 비밀번호",
+        max_length=255,
+        strip=False,
+        widget=forms.PasswordInput,
+    )
+    new_password = forms.CharField(
+        label="새 비밀번호",
+        min_length=8,
+        max_length=255,
+        strip=False,
+        widget=forms.PasswordInput,
+        error_messages={
+            "min_length": "새 비밀번호는 8자 이상 입력해 주세요.",
+        },
+    )
+    new_password_confirm = forms.CharField(
+        label="새 비밀번호 확인",
+        min_length=8,
+        max_length=255,
+        strip=False,
+        widget=forms.PasswordInput,
+        error_messages={
+            "min_length": "새 비밀번호는 8자 이상 입력해 주세요.",
+        },
+    )
+
+    def __init__(self, *args, user, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_current_password(self):
+        password = self.cleaned_data["current_password"]
+        if not self.user.check_password(password):
+            raise ValidationError("현재 비밀번호가 올바르지 않습니다.")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("new_password")
+        password_confirm = cleaned_data.get("new_password_confirm")
+
+        if password and password_confirm and password != password_confirm:
+            self.add_error(
+                "new_password_confirm",
+                "새 비밀번호가 일치하지 않습니다.",
+            )
+
+        return cleaned_data
+
+
 class SignUpForm(forms.ModelForm):
     password = forms.CharField(
         label="비밀번호",

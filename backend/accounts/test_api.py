@@ -72,6 +72,8 @@ class AuthApiContractTests(AuthApiTestMixin, TestCase):
         self.assertEqual(reverse("auth_api:login"), "/api/auth/login/")
         self.assertEqual(reverse("auth_api:logout"), "/api/auth/logout/")
         self.assertEqual(reverse("auth_api:me"), "/api/auth/me/")
+        self.assertEqual(reverse("auth_api:profile"), "/api/auth/profile/")
+        self.assertEqual(reverse("auth_api:password"), "/api/auth/password/")
 
     def test_csrf_endpoint_returns_json_token_and_cookie(self):
         response = self.client.get(reverse("auth_api:csrf"))
@@ -583,6 +585,130 @@ class MeApiTests(AuthApiTestMixin, TestCase):
         self.assertEqual(response.headers["Content-Type"], "application/json")
 
 
+class ProfileApiTests(AuthApiTestMixin, TestCase):
+    def patch_profile(self, client, payload, *, csrf_token=None):
+        headers = {}
+        if csrf_token:
+            headers["HTTP_X_CSRFTOKEN"] = csrf_token
+        return client.patch(
+            reverse("auth_api:profile"),
+            data=json.dumps(payload),
+            content_type="application/json",
+            **headers,
+        )
+
+    def test_profile_requires_login(self):
+        response = self.patch_profile(self.client, {"nickname": "새 닉네임"})
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["detail"], "로그인이 필요합니다.")
+
+    def test_profile_updates_trimmed_nickname_and_returns_user(self):
+        user = self.create_user(nickname="기존 닉네임")
+        self.login(self.client, user)
+
+        response = self.patch_profile(
+            self.client,
+            {
+                "nickname": "  새 닉네임  ",
+                "email": "changed@example.com",
+                "role": User.ROLE_SUPER_ADMIN,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        user.refresh_from_db()
+        self.assertEqual(user.nickname, "새 닉네임")
+        self.assertEqual(user.email, "admin@example.com")
+        self.assertEqual(user.role, User.ROLE_USER)
+        self.assertEqual(response.json()["user"]["nickname"], "새 닉네임")
+
+    def test_profile_allows_clearing_nickname(self):
+        user = self.create_user(nickname="기존 닉네임")
+        self.login(self.client, user)
+
+        response = self.patch_profile(self.client, {"nickname": "   "})
+
+        self.assertEqual(response.status_code, 200)
+        user.refresh_from_db()
+        self.assertIsNone(user.nickname)
+
+
+class PasswordApiTests(AuthApiTestMixin, TestCase):
+    new_password = "New!Passphrase-7746"
+
+    def password_payload(self, **overrides):
+        return {
+            "current_password": self.password,
+            "new_password": self.new_password,
+            "new_password_confirm": self.new_password,
+        } | overrides
+
+    def test_password_change_requires_login(self):
+        response = self.post_json(
+            self.client,
+            reverse("auth_api:password"),
+            self.password_payload(),
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["detail"], "로그인이 필요합니다.")
+
+    def test_password_change_updates_hash_and_keeps_session(self):
+        user = self.create_user()
+        self.login(self.client, user)
+
+        response = self.post_json(
+            self.client,
+            reverse("auth_api:password"),
+            self.password_payload(),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        user.refresh_from_db()
+        self.assertTrue(user.check_password(self.new_password))
+        self.assertFalse(user.check_password(self.password))
+        self.assertTrue(
+            self.client.get(reverse("auth_api:me")).json()["authenticated"]
+        )
+
+    def test_password_change_rejects_wrong_current_password(self):
+        user = self.create_user()
+        self.login(self.client, user)
+
+        response = self.post_json(
+            self.client,
+            reverse("auth_api:password"),
+            self.password_payload(current_password="wrong-password"),
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()["errors"]["current_password"],
+            ["현재 비밀번호가 올바르지 않습니다."],
+        )
+        user.refresh_from_db()
+        self.assertTrue(user.check_password(self.password))
+
+    def test_password_change_rejects_mismatched_confirmation(self):
+        user = self.create_user()
+        self.login(self.client, user)
+
+        response = self.post_json(
+            self.client,
+            reverse("auth_api:password"),
+            self.password_payload(
+                new_password_confirm="Different!Passphrase-7746",
+            ),
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()["errors"]["new_password_confirm"],
+            ["새 비밀번호가 일치하지 않습니다."],
+        )
+
+
 class LogoutApiTests(AuthApiTestMixin, TestCase):
     def test_logout_clears_session_and_rotates_csrf(self):
         user = self.create_user()
@@ -678,6 +804,36 @@ class AuthApiCsrfTests(AuthApiTestMixin, TestCase):
                 self.assertEqual(response.headers["Cache-Control"], "no-store")
 
         self.assertFalse(User.objects.exists())
+
+    def test_profile_endpoints_reject_missing_csrf_as_json(self):
+        user = self.create_user()
+        client = Client(enforce_csrf_checks=True)
+        csrf_token = self.get_csrf_token(client)
+        self.login(client, user, csrf_token=csrf_token)
+
+        responses = (
+            client.patch(
+                reverse("auth_api:profile"),
+                data=json.dumps({"nickname": "새 닉네임"}),
+                content_type="application/json",
+            ),
+            self.post_json(
+                client,
+                reverse("auth_api:password"),
+                {
+                    "current_password": self.password,
+                    "new_password": "New!Passphrase-7746",
+                    "new_password_confirm": "New!Passphrase-7746",
+                },
+            ),
+        )
+
+        for response in responses:
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(
+                response.json()["detail"],
+                "CSRF 검증에 실패했습니다.",
+            )
 
     def test_invalid_csrf_header_is_rejected_as_json(self):
         client = Client(enforce_csrf_checks=True)

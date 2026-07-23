@@ -19,7 +19,7 @@ function navigationLinkClass({ isActive }: { isActive: boolean }) {
 
 export function Navigation() {
   const {
-    displayName,
+    nickname,
     email,
     isSuperAdmin,
     globalError,
@@ -62,15 +62,38 @@ export function Navigation() {
             )}
           </nav>
 
-          <div className="flex min-w-0 items-center justify-end gap-3">
-            <span
-              className="max-w-48 truncate text-sm font-medium text-[var(--auth-text)] max-sm:max-w-28"
+          <div className="flex min-w-0 items-center justify-end gap-2">
+            <NavLink
+              aria-label="마이페이지"
+              className={({ isActive }) =>
+                [
+                  'flex min-h-11 min-w-0 max-w-56 items-center gap-2 rounded-lg px-2.5 py-1.5 text-left no-underline transition-colors duration-150',
+                  'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--auth-primary)]',
+                  isActive
+                    ? 'bg-[var(--auth-notice-background)]'
+                    : 'hover:bg-[var(--auth-background)]',
+                ].join(' ')
+              }
+              to="/intro/profile"
               title={email}
             >
-              {displayName}
-            </span>
+              <span
+                aria-hidden="true"
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--auth-primary)] text-xs font-bold text-white"
+              >
+                {(nickname || email || 'U').charAt(0).toUpperCase()}
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <strong className="truncate text-[13px] leading-4.5 font-semibold text-[var(--auth-text)]">
+                  {nickname || '내 계정'}
+                </strong>
+                <span className="truncate text-[11px] leading-4 text-[var(--auth-muted)]">
+                  {email}
+                </span>
+              </span>
+            </NavLink>
             <button
-              className="min-h-11 shrink-0 cursor-pointer rounded-lg border border-[var(--auth-border)] bg-[var(--auth-surface)] px-4 text-sm font-semibold text-[var(--auth-primary)] transition-colors duration-150 hover:border-[var(--auth-primary)] hover:bg-[var(--auth-notice-background)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--auth-primary)] disabled:cursor-wait disabled:opacity-60"
+              className="min-h-11 shrink-0 cursor-pointer rounded-lg border border-[var(--auth-border)] bg-[var(--auth-surface)] px-3.5 text-sm font-semibold text-[var(--auth-primary)] transition-colors duration-150 hover:border-[var(--auth-primary)] hover:bg-[var(--auth-notice-background)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--auth-primary)] disabled:cursor-wait disabled:opacity-60"
               disabled={isSubmitting}
               onClick={handleLogout}
               type="button"
