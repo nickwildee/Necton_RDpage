@@ -46,7 +46,7 @@ export type FeatureEditorState = {
 
 const EMPTY_PAGINATION: FeatureValuePagination = {
   page: 1,
-  pageSize: 6,
+  pageSize: 8,
   totalItems: 0,
   totalPages: 1,
 }

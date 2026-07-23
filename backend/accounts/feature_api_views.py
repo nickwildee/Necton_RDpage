@@ -12,7 +12,7 @@ from .api_views import (
 )
 from .models import FeatureGroup, FeatureType, FeatureValue, User
 
-FEATURE_VALUE_PAGE_SIZE = 6
+FEATURE_VALUE_PAGE_SIZE = 8
 MISSING = object()
 
 
