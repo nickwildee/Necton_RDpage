@@ -3,6 +3,10 @@ export { useAuth } from './model/useAuth'
 export { requestError } from './model/requestError'
 export type { LoginFields, SignupFields } from './model/types'
 export { AuthLayout } from './ui/AuthLayout'
-export { GuestOnly, RequireAuth } from './ui/AuthRoute'
+export {
+  GuestOnly,
+  RequireAuth,
+  RequireSuperAdmin,
+} from './ui/AuthRoute'
 export { LoginForm } from './ui/LoginForm'
 export { SignupForm } from './ui/SignupForm'

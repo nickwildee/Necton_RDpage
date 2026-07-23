@@ -1,7 +1,12 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { GuestOnly, RequireAuth } from '@features/auth'
+import {
+  GuestOnly,
+  RequireAuth,
+  RequireSuperAdmin,
+} from '@features/auth'
 import { IntroPage } from '@pages/intro'
 import { LoginPage } from '@pages/login'
+import { SettingsPage } from '@pages/settings'
 import { SignupPage } from '@pages/signup'
 
 export const router = createBrowserRouter([
@@ -26,12 +31,30 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/intro/*',
+    path: '/intro',
     element: (
       <RequireAuth>
         <IntroPage />
       </RequireAuth>
     ),
+    children: [
+      {
+        index: true,
+        element: null,
+      },
+      {
+        path: 'settings',
+        element: (
+          <RequireSuperAdmin>
+            <SettingsPage />
+          </RequireSuperAdmin>
+        ),
+      },
+      {
+        path: '*',
+        element: null,
+      },
+    ],
   },
   {
     path: '/account',

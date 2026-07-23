@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return response.csrfToken
   }
 
-  const postWithCsrf = async <T,>(
+  const requestWithCsrf = async <T,>(
     request: (token: string) => Promise<T>,
   ) => {
     const token = await requireCsrfToken()
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const loginUser = async (fields: LoginFields) => {
-    const response = await postWithCsrf<LoginResponse>((token) =>
+    const response = await requestWithCsrf<LoginResponse>((token) =>
       login(fields, token),
     )
     setUser(response.user)
@@ -94,10 +94,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signupUser = (fields: SignupFields) =>
-    postWithCsrf<SignupResponse>((token) => signup(fields, token))
+    requestWithCsrf<SignupResponse>((token) => signup(fields, token))
 
   const logoutUser = async () => {
-    const response = await postWithCsrf<LoginResponse>((token) => logout(token))
+    const response = await requestWithCsrf<LoginResponse>((token) =>
+      logout(token),
+    )
     setUser(null)
     setCsrfToken(response.csrfToken)
   }
@@ -108,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isLoading,
         initialError,
+        requestWithCsrf,
         login: loginUser,
         signup: signupUser,
         logout: logoutUser,
