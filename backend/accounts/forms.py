@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from django.db.models import Max
 
 from .models import User
 
@@ -43,6 +44,69 @@ class LoginForm(forms.Form):
         return self.user_cache
 
 
+class NicknameForm(forms.Form):
+    nickname = forms.CharField(
+        label="닉네임",
+        required=False,
+        max_length=255,
+    )
+
+    def clean_nickname(self):
+        return self.cleaned_data["nickname"].strip() or None
+
+
+class PasswordChangeForm(forms.Form):
+    current_password = forms.CharField(
+        label="현재 비밀번호",
+        max_length=255,
+        strip=False,
+        widget=forms.PasswordInput,
+    )
+    new_password = forms.CharField(
+        label="새 비밀번호",
+        min_length=8,
+        max_length=255,
+        strip=False,
+        widget=forms.PasswordInput,
+        error_messages={
+            "min_length": "새 비밀번호는 8자 이상 입력해 주세요.",
+        },
+    )
+    new_password_confirm = forms.CharField(
+        label="새 비밀번호 확인",
+        min_length=8,
+        max_length=255,
+        strip=False,
+        widget=forms.PasswordInput,
+        error_messages={
+            "min_length": "새 비밀번호는 8자 이상 입력해 주세요.",
+        },
+    )
+
+    def __init__(self, *args, user, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_current_password(self):
+        password = self.cleaned_data["current_password"]
+        if not self.user.check_password(password):
+            raise ValidationError("현재 비밀번호가 올바르지 않습니다.")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("new_password")
+        password_confirm = cleaned_data.get("new_password_confirm")
+
+        if password and password_confirm and password != password_confirm:
+            self.add_error(
+                "new_password_confirm",
+                "새 비밀번호가 일치하지 않습니다.",
+            )
+
+        return cleaned_data
+
+
 class SignUpForm(forms.ModelForm):
     password = forms.CharField(
         label="비밀번호",
@@ -73,6 +137,7 @@ class SignUpForm(forms.ModelForm):
             "invalid": "핸드폰 번호는 숫자 11자리로 입력해 주세요.",
         },
     )
+    company = forms.CharField(label="회사명", max_length=255)
 
     class Meta:
         model = User
@@ -86,6 +151,9 @@ class SignUpForm(forms.ModelForm):
 
     def clean_phone(self):
         return self.cleaned_data["phone"] or None
+
+    def clean_company(self):
+        return self.cleaned_data["company"].strip()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -103,6 +171,18 @@ class SignUpForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
+        company_name = self.cleaned_data["company"]
+        company_id = (
+            User.objects.filter(company_name__iexact=company_name)
+            .order_by("company_id")
+            .values_list("company_id", flat=True)
+            .first()
+        )
+        if company_id is None:
+            maximum = User.objects.aggregate(Max("company_id"))["company_id__max"]
+            company_id = (maximum or 0) + 1
+        user.company_id = company_id
+        user.company_name = company_name
         if commit:
             user.save()
         return user

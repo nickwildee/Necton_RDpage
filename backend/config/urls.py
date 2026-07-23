@@ -18,7 +18,11 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 
+from accounts import api_views
+
 urlpatterns = [
+    path('api/', include('accounts.api_urls')),
+    re_path(r'^api(?:/.*)?$', api_views.api_not_found),
     path(
         '',
         RedirectView.as_view(pattern_name='accounts:login', permanent=False),

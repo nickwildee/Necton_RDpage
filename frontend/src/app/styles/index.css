@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+:root {
+  --auth-background: #f5f6f8;
+  --auth-surface: #ffffff;
+  --auth-text: #383b41;
+  --auth-muted: #7a7f88;
+  --auth-border: #dfe2e7;
+  --auth-field-background: #fcfcfd;
+  --auth-primary: #4f607e;
+  --auth-primary-hover: #40506c;
+  --auth-focus: rgb(79 96 126 / 18%);
+  --auth-notice-background: #f2f5fa;
+  --auth-notice-border: #d7deea;
+  --auth-error: #b42318;
+  --auth-error-focus: rgb(180 35 24 / 14%);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    @apply m-0 min-w-80 bg-[var(--auth-background)] font-sans tracking-[0.01em] text-[var(--auth-text)];
+  }
+}
+
+#root {
+  @apply min-h-screen min-h-svh;
+}

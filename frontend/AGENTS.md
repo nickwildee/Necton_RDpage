@@ -11,3 +11,10 @@ matching backend change.
 - Use cookie-based sessions with CSRF protection. Do not store passwords or session
   credentials in localStorage.
 - Keep components and styling in `frontend/`; do not add React assets to Django templates.
+- Keep FSD dependencies flowing downward: `app` → `pages` → `widgets` → `features` →
+  `entities` → `shared`. A lower layer must not import a higher layer.
+- Pages compose screens. Put rendering in `ui/`, state and event behavior in `model/`
+  custom hooks, and endpoint calls in `api/`. Do not move form state or API requests back
+  into page components.
+- See `../docs/ARCHITECTURE.md` for the auth and FSD boundaries. Follow
+  `../CONTRIBUTING.md` for Git Flow and verification commands.

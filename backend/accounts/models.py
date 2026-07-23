@@ -8,6 +8,9 @@ class User(models.Model):
     """회원 테이블 스키마에 대응하는 사용자 모델."""
 
     ROLE_USER = "USER"
+    ROLE_ORG_USER = "ORG_USER"
+    ROLE_ORG_ADMIN = "ORG_ADMIN"
+    ROLE_SUPER_ADMIN = "SUPER_ADMIN"
     STATUS_ACTIVE = "A"
 
     user_id = models.AutoField(primary_key=True)
@@ -16,7 +19,8 @@ class User(models.Model):
     nickname = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
     role = models.CharField(max_length=11, default=ROLE_USER)
-    company = models.CharField(max_length=255, blank=True, null=True)
+    company_id = models.IntegerField()
+    company_name = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=1, default=STATUS_ACTIVE)
     created_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
@@ -55,3 +59,74 @@ class User(models.Model):
             secret=secret,
             algorithm="sha256",
         ).hexdigest()
+
+
+class FeatureGroup(models.Model):
+    """기존 BDM_FEATURE_GROUP 대분류 테이블 매핑."""
+
+    feature_group_id = models.AutoField(primary_key=True)
+    feature = models.CharField(max_length=100)
+    description = models.CharField(max_length=500)
+
+    class Meta:
+        managed = False
+        db_table = "BDM_FEATURE_GROUP"
+        ordering = ("feature_group_id",)
+
+
+class FeatureType(models.Model):
+    """기존 BDM_FEATURE_TYPE 중분류 테이블 매핑."""
+
+    feature_group = models.ForeignKey(
+        FeatureGroup,
+        db_column="feature_group_id",
+        db_constraint=False,
+        null=True,
+        on_delete=models.DO_NOTHING,
+        related_name="feature_types",
+    )
+    feature_type_id = models.AutoField(primary_key=True)
+    feature = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    note = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "BDM_FEATURE_TYPE"
+        ordering = ("feature_type_id",)
+
+
+class FeatureValue(models.Model):
+    """기존 BDM_FEATURE_VALUE 소분류 테이블 매핑."""
+
+    feature_group = models.ForeignKey(
+        FeatureGroup,
+        db_column="feature_group_id",
+        db_constraint=False,
+        null=True,
+        on_delete=models.DO_NOTHING,
+        related_name="feature_values",
+    )
+    feature_type = models.ForeignKey(
+        FeatureType,
+        db_column="feature_type_id",
+        db_constraint=False,
+        null=True,
+        on_delete=models.DO_NOTHING,
+        related_name="feature_values",
+    )
+    feature_value_id = models.AutoField(primary_key=True)
+    feature_type_name = models.CharField(
+        db_column="feature_type",
+        max_length=255,
+    )
+    feature = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    c_weight = models.SmallIntegerField(blank=True, null=True)
+    s_weight = models.SmallIntegerField(blank=True, null=True)
+    o_weight = models.SmallIntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "BDM_FEATURE_VALUE"
+        ordering = ("feature_value_id",)
