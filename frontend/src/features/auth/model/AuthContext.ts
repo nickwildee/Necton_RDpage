@@ -6,6 +6,9 @@ export type AuthContextValue = {
   user: AuthUser | null
   isLoading: boolean
   initialError: string | null
+  requestWithCsrf: <T>(
+    request: (token: string) => Promise<T>,
+  ) => Promise<T>
   login: (fields: LoginFields) => Promise<AuthUser>
   signup: (fields: SignupFields) => Promise<SignupResponse>
   logout: () => Promise<void>

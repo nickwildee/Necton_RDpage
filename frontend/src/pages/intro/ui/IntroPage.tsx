@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Outlet } from 'react-router-dom'
 import { Navigation } from '@widgets/navigation'
 
 export function IntroPage() {
@@ -12,7 +13,9 @@ export function IntroPage() {
       <main
         aria-label="Necton RD 인트로"
         className="mx-auto w-full max-w-[1200px] flex-1"
-      />
+      >
+        <Outlet />
+      </main>
     </div>
   )
 }

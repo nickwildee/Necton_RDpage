@@ -22,3 +22,17 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 
   return user ? children : <Navigate to="/login" replace />
 }
+
+export function RequireSuperAdmin({ children }: { children: ReactNode }) {
+  const { user, isLoading } = useAuth()
+
+  if (isLoading) {
+    return <AuthLoading />
+  }
+
+  return user?.role === 'SUPER_ADMIN' ? (
+    children
+  ) : (
+    <Navigate to="/intro" replace />
+  )
+}
