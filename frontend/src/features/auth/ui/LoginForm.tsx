@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ErrorMessages } from '@shared/ui'
 import { useLoginForm } from '../model/useLoginForm'
+import { authInputClassName, authStyles } from './authStyles'
 
 export function LoginForm() {
   const {
@@ -14,42 +15,44 @@ export function LoginForm() {
   } = useLoginForm()
 
   return (
-    <section className="auth-card" aria-labelledby="login-title">
-      <header className="auth-header">
-        <h1 className="auth-title" id="login-title">
+    <section className={authStyles.card} aria-labelledby="login-title">
+      <header className={authStyles.header}>
+        <h1 className={authStyles.title} id="login-title">
           Necton RD
         </h1>
-        <p className="auth-subtitle">등록된 계정으로 로그인해 주세요</p>
+        <p className={authStyles.subtitle}>
+          등록된 계정으로 로그인해 주세요
+        </p>
       </header>
 
       {notice && (
-        <p className="auth-notice" role="status">
+        <p className={authStyles.notice} role="status">
           {notice}
         </p>
       )}
 
       {globalError && (
-        <div className="auth-form-errors" role="alert">
-          <p>{globalError}</p>
+        <div className={authStyles.formErrors} role="alert">
+          <p className={authStyles.error}>{globalError}</p>
         </div>
       )}
 
       {errors.non_field_errors && (
-        <div className="auth-form-errors" role="alert">
+        <div className={authStyles.formErrors} role="alert">
           <ErrorMessages
             messages={errors.non_field_errors}
-            className="auth-error"
+            className={authStyles.error}
           />
         </div>
       )}
 
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        <div className="auth-field">
-          <label className="auth-label" htmlFor="login-email">
+      <form className={authStyles.form} onSubmit={handleSubmit} noValidate>
+        <div className={authStyles.field}>
+          <label className={authStyles.label} htmlFor="login-email">
             이메일
           </label>
           <input
-            className={`auth-input${errors.email ? ' auth-input--error' : ''}`}
+            className={authInputClassName(Boolean(errors.email))}
             id="login-email"
             name="email"
             type="email"
@@ -66,16 +69,16 @@ export function LoginForm() {
           <ErrorMessages
             id="login-email-error"
             messages={errors.email}
-            className="auth-error"
+            className={authStyles.error}
           />
         </div>
 
-        <div className="auth-field">
-          <label className="auth-label" htmlFor="login-password">
+        <div className={authStyles.field}>
+          <label className={authStyles.label} htmlFor="login-password">
             비밀번호
           </label>
           <input
-            className={`auth-input${errors.password ? ' auth-input--error' : ''}`}
+            className={authInputClassName(Boolean(errors.password))}
             id="login-password"
             name="password"
             type="password"
@@ -93,17 +96,21 @@ export function LoginForm() {
           <ErrorMessages
             id="login-password-error"
             messages={errors.password}
-            className="auth-error"
+            className={authStyles.error}
           />
         </div>
 
-        <button className="auth-submit" type="submit" disabled={isSubmitting}>
+        <button
+          className={authStyles.submit}
+          type="submit"
+          disabled={isSubmitting}
+        >
           로그인
         </button>
 
-        <p className="auth-switch">
+        <p className={authStyles.switchText}>
           계정이 없으신가요?
-          <Link className="auth-link" to="/signup">
+          <Link className={authStyles.link} to="/signup">
             회원가입
           </Link>
         </p>
