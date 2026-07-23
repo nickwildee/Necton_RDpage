@@ -311,7 +311,7 @@ export function useFeatureManagement() {
           const response = await requestWithCsrf((token) =>
             createFeatureGroup(payload, token),
           )
-          setSelectedGroupId(response.item.id)
+          selectGroup(response.item.id)
         } else if (editor.id !== null) {
           await requestWithCsrf((token) =>
             updateFeatureGroup(editor.id!, payload, token),
