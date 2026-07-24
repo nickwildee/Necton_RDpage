@@ -7,16 +7,16 @@ import type {
 } from '../model/useFeatureManagement'
 
 const fieldClassName = [
-  'h-11 w-full rounded-lg border border-[var(--auth-border)]',
-  'bg-[var(--auth-field-background)] px-3.5 text-sm text-[var(--auth-text)]',
+  'h-11 w-full rounded-control border border-line',
+  'bg-surface-field px-3.5 text-sm text-ink',
   'transition-[border-color,box-shadow,background-color] duration-150',
-  'focus:border-[var(--auth-primary)] focus:bg-[var(--auth-surface)]',
-  'focus:shadow-[0_0_0_3px_var(--auth-focus)] focus:outline-none',
+  'focus:border-brand focus:bg-surface',
+  'focus:shadow-focus focus:outline-none',
 ].join(' ')
 
-const labelClassName = 'text-xs font-bold text-[#565b63]'
+const labelClassName = 'text-xs font-bold text-ink-secondary'
 const errorClassName =
-  'mt-1 mb-0 text-[11px] leading-4 text-[var(--auth-error)]'
+  'mt-1 mb-0 text-caption leading-4 text-danger'
 
 const kindLabels = {
   group: '대분류',
@@ -55,16 +55,16 @@ export function FeatureEditorDialog({
     <div
       aria-label={`${kindLabel} ${isCreate ? '추가' : '수정'}`}
       aria-modal="true"
-      className="fixed inset-0 z-50 grid place-items-center bg-[rgb(32_39_52_/_42%)] px-5 py-8"
+      className="fixed inset-0 z-50 grid place-items-center bg-overlay px-5 py-8"
       role="dialog"
     >
       <form
-        className="w-full max-w-[520px] overflow-hidden rounded-xl bg-[var(--auth-surface)] shadow-[0_18px_60px_rgb(32_39_52_/_22%)]"
+        className="w-full max-w-dialog overflow-hidden rounded-panel bg-surface shadow-dialog"
         onSubmit={handleSubmit}
       >
-        <header className="flex min-h-[72px] items-center justify-between border-b border-[var(--auth-border)] px-6">
+        <header className="flex min-h-[72px] items-center justify-between border-b border-line px-6">
           <div>
-            <p className="m-0 text-[11px] font-bold tracking-[0.08em] text-[var(--auth-primary)]">
+            <p className="m-0 text-caption font-bold tracking-[0.08em] text-brand">
               {kindLabel.toUpperCase()}
             </p>
             <h2 className="mt-1 mb-0 text-xl font-bold tracking-[-0.01em]">
@@ -73,7 +73,7 @@ export function FeatureEditorDialog({
           </div>
           <button
             aria-label="닫기"
-            className="h-10 w-10 cursor-pointer rounded-lg border-0 bg-transparent text-xl text-[var(--auth-muted)] hover:bg-[var(--auth-notice-background)]"
+            className="h-10 w-10 cursor-pointer rounded-control border-0 bg-transparent text-xl text-ink-muted hover:bg-brand-soft"
             disabled={isSubmitting}
             onClick={onClose}
             type="button"
@@ -85,7 +85,7 @@ export function FeatureEditorDialog({
         <div className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto p-6">
           {error && (
             <p
-              className="m-0 rounded-lg border border-[#f0d0cc] bg-[#fff8f7] px-3.5 py-3 text-xs leading-5 text-[var(--auth-error)]"
+              className="m-0 rounded-control border border-danger-line bg-danger-soft px-3.5 py-3 text-xs leading-5 text-danger"
               role="alert"
             >
               {error}
@@ -98,7 +98,7 @@ export function FeatureEditorDialog({
 
           <label className="flex flex-col gap-2">
             <span className={labelClassName}>
-              {kindLabel} 이름 <span className="text-[var(--auth-primary)]">*</span>
+              {kindLabel} 이름 <span className="text-brand">*</span>
             </span>
             <input
               aria-describedby={
@@ -125,7 +125,7 @@ export function FeatureEditorDialog({
             <span className={labelClassName}>
               설명{' '}
               {editor.kind !== 'value' && (
-                <span className="text-[var(--auth-primary)]">*</span>
+                <span className="text-brand">*</span>
               )}
             </span>
             <textarea
@@ -209,11 +209,11 @@ export function FeatureEditorDialog({
           )}
         </div>
 
-        <footer className="flex min-h-[72px] items-center justify-between gap-4 border-t border-[var(--auth-border)] bg-[#fafbfc] px-6">
+        <footer className="flex min-h-[72px] items-center justify-between gap-4 border-t border-line bg-surface-muted px-6">
           <div>
             {!isCreate && (
               <button
-                className="min-h-10 cursor-pointer rounded-lg border border-[#e6c2bd] bg-[var(--auth-surface)] px-4 text-xs font-bold text-[var(--auth-error)] hover:bg-[#fff8f7] disabled:cursor-wait disabled:opacity-60"
+                className="min-h-10 cursor-pointer rounded-control border border-danger-line-strong bg-surface px-4 text-xs font-bold text-danger hover:bg-danger-soft disabled:cursor-wait disabled:opacity-60"
                 disabled={isSubmitting}
                 onClick={() => void onDelete()}
                 type="button"
@@ -224,7 +224,7 @@ export function FeatureEditorDialog({
           </div>
           <div className="flex items-center gap-2">
             <button
-              className="min-h-10 cursor-pointer rounded-lg border border-[var(--auth-border)] bg-[var(--auth-surface)] px-4 text-xs font-bold text-[var(--auth-muted)] hover:bg-[var(--auth-notice-background)] disabled:cursor-wait disabled:opacity-60"
+              className="min-h-10 cursor-pointer rounded-control border border-line bg-surface px-4 text-xs font-bold text-ink-muted hover:bg-brand-soft disabled:cursor-wait disabled:opacity-60"
               disabled={isSubmitting}
               onClick={onClose}
               type="button"
@@ -232,7 +232,7 @@ export function FeatureEditorDialog({
               취소
             </button>
             <button
-              className="min-h-10 cursor-pointer rounded-lg border border-[var(--auth-primary)] bg-[var(--auth-primary)] px-5 text-xs font-bold text-white hover:bg-[var(--auth-primary-hover)] disabled:cursor-wait disabled:opacity-60"
+              className="min-h-10 cursor-pointer rounded-control border border-brand bg-brand px-5 text-xs font-bold text-white hover:bg-brand-strong disabled:cursor-wait disabled:opacity-60"
               disabled={isSubmitting}
               type="submit"
             >

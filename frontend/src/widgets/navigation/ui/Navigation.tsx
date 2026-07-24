@@ -10,10 +10,10 @@ const navigationItems = [
 function navigationLinkClass({ isActive }: { isActive: boolean }) {
   return [
     'inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border-b-2 px-1 text-sm font-semibold no-underline transition-colors duration-150',
-    'focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-primary)]',
+    'focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand',
     isActive
-      ? 'border-[var(--auth-primary)] text-[var(--auth-primary-hover)]'
-      : 'border-transparent text-[var(--auth-muted)] hover:border-[var(--auth-border)] hover:text-[var(--auth-text)]',
+      ? 'border-brand text-brand-strong'
+      : 'border-transparent text-ink-muted hover:border-line hover:text-ink',
   ].join(' ')
 }
 
@@ -29,10 +29,10 @@ export function Navigation() {
 
   return (
     <>
-      <header className="border-b border-[var(--auth-border)] bg-[var(--auth-surface)]">
-        <div className="mx-auto grid min-h-[72px] max-w-[1200px] grid-cols-[auto_1fr_auto] items-center gap-x-10 px-6 max-md:grid-cols-[1fr_auto] max-md:gap-x-4 max-md:py-3 max-sm:grid-cols-1 max-sm:gap-y-2 lg:px-10">
+      <header className="border-b border-line bg-surface">
+        <div className="mx-auto grid min-h-[72px] max-w-app grid-cols-[auto_1fr_auto] items-center gap-x-10 px-6 max-md:grid-cols-[1fr_auto] max-md:gap-x-4 max-md:py-3 max-sm:grid-cols-1 max-sm:gap-y-2 lg:px-10">
           <Link
-            className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap text-xl font-bold tracking-[-0.01em] text-[var(--auth-text)] no-underline focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--auth-primary)]"
+            className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap text-xl font-bold tracking-[-0.01em] text-ink no-underline focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand"
             to="/intro"
           >
             Necton RD
@@ -67,11 +67,11 @@ export function Navigation() {
               aria-label="마이페이지"
               className={({ isActive }) =>
                 [
-                  'flex min-h-11 min-w-0 max-w-72 items-center gap-2 rounded-lg px-2.5 py-1.5 text-left no-underline transition-colors duration-150 max-sm:max-w-[calc(100%-92px)]',
-                  'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--auth-primary)]',
+                  'flex min-h-11 min-w-0 max-w-72 items-center gap-2 rounded-control px-2.5 py-1.5 text-left no-underline transition-colors duration-150 max-sm:max-w-[calc(100%-92px)]',
+                  'focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand',
                   isActive
-                    ? 'bg-[var(--auth-notice-background)]'
-                    : 'hover:bg-[var(--auth-background)]',
+                    ? 'bg-brand-soft'
+                    : 'hover:bg-canvas',
                 ].join(' ')
               }
               to="/intro/profile"
@@ -79,21 +79,21 @@ export function Navigation() {
             >
               <span
                 aria-hidden="true"
-                className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--auth-primary)] text-xs font-bold text-white"
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold text-white"
               >
                 {(nickname || email || 'U').charAt(0).toUpperCase()}
               </span>
               <span className="flex min-w-0 flex-col">
-                <strong className="truncate text-[13px] leading-4.5 font-semibold text-[var(--auth-text)]">
+                <strong className="truncate text-label leading-4.5 font-semibold text-ink">
                   {nickname || '내 계정'}
                 </strong>
-                <span className="truncate text-[11px] leading-4 text-[var(--auth-muted)]">
+                <span className="truncate text-caption leading-4 text-ink-muted">
                   {email}
                 </span>
               </span>
             </NavLink>
             <button
-              className="min-h-11 shrink-0 cursor-pointer rounded-lg border border-[var(--auth-border)] bg-[var(--auth-surface)] px-3.5 text-sm font-semibold text-[var(--auth-primary)] transition-colors duration-150 hover:border-[var(--auth-primary)] hover:bg-[var(--auth-notice-background)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--auth-primary)] disabled:cursor-wait disabled:opacity-60"
+              className="min-h-11 shrink-0 cursor-pointer rounded-control border border-line bg-surface px-3.5 text-sm font-semibold text-brand transition-colors duration-150 hover:border-brand hover:bg-brand-soft focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-60"
               disabled={isSubmitting}
               onClick={handleLogout}
               type="button"
@@ -106,7 +106,7 @@ export function Navigation() {
 
       {globalError && (
         <div
-          className="mx-auto mt-4 max-w-[1200px] px-6 text-sm text-[var(--auth-error)] lg:px-10"
+          className="mx-auto mt-4 max-w-app px-6 text-sm text-danger lg:px-10"
           role="alert"
         >
           {globalError}

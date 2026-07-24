@@ -5,7 +5,7 @@ import type {
 
 function Weight({ value }: { value: number | null }) {
   return (
-    <span className="inline-flex h-[26px] min-w-[30px] items-center justify-center rounded-md border border-[var(--auth-border)] bg-[#f8f9fb] px-1 text-[11px] font-bold text-[#565b63] tabular-nums">
+    <span className="inline-flex h-[26px] min-w-[30px] items-center justify-center rounded-compact border border-line bg-surface-subtle px-1 text-caption font-bold text-ink-secondary tabular-nums">
       {value ?? '—'}
     </span>
   )
@@ -52,25 +52,25 @@ export function FeatureValueTable({
   )
 
   return (
-    <section className="col-span-1 flex min-w-0 flex-col border-t border-[var(--auth-border)] bg-[var(--auth-surface)] lg:col-span-2 xl:col-span-1 xl:min-h-[636px] xl:border-t-0 xl:border-l">
-      <header className="flex min-h-[76px] items-center justify-between gap-3 border-b border-[var(--auth-border)] px-[18px]">
+    <section className="col-span-1 flex min-w-0 flex-col border-t border-line bg-surface lg:col-span-2 xl:col-span-1 xl:min-h-[636px] xl:border-t-0 xl:border-l">
+      <header className="flex min-h-[76px] items-center justify-between gap-3 border-b border-line px-[18px]">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="m-0 text-base font-bold tracking-[-0.01em]">
               소분류
             </h2>
-            <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[var(--auth-notice-background)] px-1.5 text-[11px] font-bold text-[var(--auth-primary)]">
+            <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-soft px-1.5 text-caption font-bold text-brand">
               {pagination.totalItems}
             </span>
           </div>
-          <p className="mt-1 mb-0 truncate text-[11px] text-[var(--auth-muted)]">
+          <p className="mt-1 mb-0 truncate text-caption text-ink-muted">
             {typeName
               ? `${typeName}에 속한 실제 데이터`
               : '중분류를 선택해 주세요.'}
           </p>
         </div>
         <button
-          className="min-h-9 shrink-0 cursor-pointer rounded-lg border border-[var(--auth-primary)] bg-[var(--auth-primary)] px-3 text-xs font-bold text-white transition-colors hover:bg-[var(--auth-primary-hover)] disabled:cursor-not-allowed disabled:opacity-45"
+          className="min-h-9 shrink-0 cursor-pointer rounded-control border border-brand bg-brand px-3 text-xs font-bold text-white transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-45"
           disabled={addDisabled}
           onClick={onAdd}
           type="button"
@@ -82,13 +82,13 @@ export function FeatureValueTable({
       <div className="min-h-72 flex-1 overflow-x-auto px-[18px]">
         <table className="w-full min-w-[590px] table-fixed border-collapse">
           <thead>
-            <tr className="h-[46px] border-b border-[var(--auth-border)] text-left text-[11px] font-bold text-[var(--auth-muted)]">
+            <tr className="h-[46px] border-b border-line text-left text-caption font-bold text-ink-muted">
               <th className="w-[27%]">항목</th>
               <th className="w-[34%] pr-3">설명</th>
               <th className="w-[7%] text-center">C</th>
               <th className="w-[7%] text-center">S</th>
               <th className="w-[7%] text-center">O</th>
-              <th className="sticky right-0 z-10 w-[18%] border-l border-[var(--auth-border)] bg-[var(--auth-surface)] pl-3 text-right">
+              <th className="sticky right-0 z-10 w-[18%] border-l border-line bg-surface pl-3 text-right">
                 관리
               </th>
             </tr>
@@ -97,7 +97,7 @@ export function FeatureValueTable({
             {isLoading && (
               <tr>
                 <td
-                  className="h-48 text-center text-xs text-[var(--auth-muted)]"
+                  className="h-48 text-center text-xs text-ink-muted"
                   colSpan={6}
                 >
                   불러오는 중입니다.
@@ -107,7 +107,7 @@ export function FeatureValueTable({
             {!isLoading && values.length === 0 && (
               <tr>
                 <td
-                  className="h-48 text-center text-xs leading-5 text-[var(--auth-muted)]"
+                  className="h-48 text-center text-xs leading-5 text-ink-muted"
                   colSpan={6}
                 >
                   {typeName
@@ -119,7 +119,7 @@ export function FeatureValueTable({
             {!isLoading &&
               values.map((value) => (
                 <tr
-                  className="h-[78px] border-b border-[#eceef1] text-xs"
+                  className="h-[78px] border-b border-line-subtle text-xs"
                   key={value.id}
                 >
                   <td>
@@ -128,7 +128,7 @@ export function FeatureValueTable({
                     </span>
                   </td>
                   <td className="pr-3">
-                    <span className="line-clamp-2 text-[11px] leading-[1.45] text-[var(--auth-muted)]">
+                    <span className="line-clamp-2 text-caption leading-[1.45] text-ink-muted">
                       {value.description || '—'}
                     </span>
                   </td>
@@ -141,17 +141,17 @@ export function FeatureValueTable({
                   <td className="text-center">
                     <Weight value={value.oWeight} />
                   </td>
-                  <td className="sticky right-0 z-10 border-l border-[#eceef1] bg-[var(--auth-surface)] pl-3 text-right">
+                  <td className="sticky right-0 z-10 border-l border-line-subtle bg-surface pl-3 text-right">
                     <span className="inline-flex items-center gap-1">
                       <button
-                        className="min-h-9 cursor-pointer border-0 bg-transparent px-1.5 text-[11px] font-bold whitespace-nowrap text-[var(--auth-primary)] hover:underline"
+                        className="min-h-9 cursor-pointer border-0 bg-transparent px-1.5 text-caption font-bold whitespace-nowrap text-brand hover:underline"
                         onClick={() => onEdit(value)}
                         type="button"
                       >
                         수정
                       </button>
                       <button
-                        className="min-h-9 cursor-pointer border-0 bg-transparent px-1.5 text-[11px] font-bold whitespace-nowrap text-[var(--auth-error)] hover:underline"
+                        className="min-h-9 cursor-pointer border-0 bg-transparent px-1.5 text-caption font-bold whitespace-nowrap text-danger hover:underline"
                         onClick={() => onDelete(value)}
                         type="button"
                       >
@@ -165,8 +165,8 @@ export function FeatureValueTable({
         </table>
       </div>
 
-      <footer className="flex min-h-16 items-center justify-between gap-4 border-t border-[var(--auth-border)] px-[18px]">
-        <span className="text-[11px] text-[var(--auth-muted)]">
+      <footer className="flex min-h-16 items-center justify-between gap-4 border-t border-line px-[18px]">
+        <span className="text-caption text-ink-muted">
           총 {pagination.totalItems}개 · {firstItem}–{lastItem} 표시
         </span>
         <nav
@@ -174,7 +174,7 @@ export function FeatureValueTable({
           className="flex items-center gap-1"
         >
           <button
-            className="h-[30px] cursor-pointer rounded-md border-0 bg-transparent px-2 text-[11px] font-bold text-[var(--auth-muted)] disabled:cursor-not-allowed disabled:opacity-35"
+            className="h-[30px] cursor-pointer rounded-compact border-0 bg-transparent px-2 text-caption font-bold text-ink-muted disabled:cursor-not-allowed disabled:opacity-35"
             disabled={currentPage <= 1 || isLoading}
             onClick={() => onPageChange(currentPage - 1)}
             type="button"
@@ -187,10 +187,10 @@ export function FeatureValueTable({
                 currentPage === pageNumber ? 'page' : undefined
               }
               className={[
-                'h-[30px] min-w-[30px] cursor-pointer rounded-md border text-[11px] font-bold',
+                'h-[30px] min-w-[30px] cursor-pointer rounded-compact border text-caption font-bold',
                 currentPage === pageNumber
-                  ? 'border-[var(--auth-primary)] bg-[var(--auth-primary)] text-white'
-                  : 'border-transparent bg-transparent text-[var(--auth-muted)] hover:border-[var(--auth-border)]',
+                  ? 'border-brand bg-brand text-white'
+                  : 'border-transparent bg-transparent text-ink-muted hover:border-line',
               ].join(' ')}
               disabled={isLoading}
               key={pageNumber}
@@ -201,7 +201,7 @@ export function FeatureValueTable({
             </button>
           ))}
           <button
-            className="h-[30px] cursor-pointer rounded-md border-0 bg-transparent px-2 text-[11px] font-bold text-[var(--auth-muted)] disabled:cursor-not-allowed disabled:opacity-35"
+            className="h-[30px] cursor-pointer rounded-compact border-0 bg-transparent px-2 text-caption font-bold text-ink-muted disabled:cursor-not-allowed disabled:opacity-35"
             disabled={
               currentPage >= pagination.totalPages || isLoading
             }
