@@ -102,23 +102,23 @@ export function FeatureListPanel<T extends FeatureListItem>({
   return (
     <section
       className={[
-        'flex min-w-0 flex-col bg-[var(--auth-surface)] xl:min-h-[636px]',
+        'flex min-w-0 flex-col bg-surface xl:min-h-[636px]',
         hasLeadingDivider
-          ? 'border-t border-[var(--auth-border)] lg:border-t-0 lg:border-l'
+          ? 'border-t border-line lg:border-t-0 lg:border-l'
           : '',
       ].join(' ')}
     >
-      <header className="flex min-h-[76px] items-center justify-between gap-3 border-b border-[var(--auth-border)] px-5">
+      <header className="flex min-h-[76px] items-center justify-between gap-3 border-b border-line px-5">
         <div className="flex items-center gap-2">
           <h2 className="m-0 text-base font-bold tracking-[-0.01em]">
             {title}
           </h2>
-          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[var(--auth-notice-background)] px-1.5 text-[11px] font-bold text-[var(--auth-primary)]">
+          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-soft px-1.5 text-caption font-bold text-brand">
             {items.length}
           </span>
         </div>
         <button
-          className="min-h-9 cursor-pointer rounded-lg border border-[var(--auth-border)] bg-[var(--auth-surface)] px-3 text-xs font-bold text-[var(--auth-primary)] transition-colors hover:border-[var(--auth-primary)] hover:bg-[var(--auth-notice-background)] disabled:cursor-not-allowed disabled:opacity-45"
+          className="min-h-9 cursor-pointer rounded-control border border-line bg-surface px-3 text-xs font-bold text-brand transition-colors hover:border-brand hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-45"
           disabled={addDisabled}
           onClick={onAdd}
           type="button"
@@ -129,12 +129,12 @@ export function FeatureListPanel<T extends FeatureListItem>({
 
       <ul className="m-0 flex min-h-32 flex-1 list-none flex-col gap-1 overflow-y-auto p-3">
         {isLoading && (
-          <li className="px-3.5 py-6 text-center text-xs text-[var(--auth-muted)]">
+          <li className="px-3.5 py-6 text-center text-xs text-ink-muted">
             불러오는 중입니다.
           </li>
         )}
         {!isLoading && items.length === 0 && (
-          <li className="px-3.5 py-6 text-center text-xs leading-5 text-[var(--auth-muted)]">
+          <li className="px-3.5 py-6 text-center text-xs leading-5 text-ink-muted">
             {emptyText}
           </li>
         )}
@@ -144,16 +144,16 @@ export function FeatureListPanel<T extends FeatureListItem>({
             return (
               <li
                 className={[
-                  'relative min-h-[76px] rounded-lg border',
+                  'relative min-h-[76px] rounded-control border',
                   isSelected
-                    ? 'border-[var(--auth-notice-border)] bg-[var(--auth-notice-background)] before:absolute before:top-3 before:bottom-3 before:left-[-1px] before:w-[3px] before:rounded-r-sm before:bg-[var(--auth-primary)]'
-                    : 'border-transparent hover:bg-[#f8f9fb]',
+                    ? 'border-brand-line bg-brand-soft before:absolute before:top-3 before:bottom-3 before:left-[-1px] before:w-[3px] before:rounded-r-sm before:bg-brand'
+                    : 'border-transparent hover:bg-surface-subtle',
                 ].join(' ')}
                 key={item.id}
               >
                 <button
                   aria-current={isSelected ? 'true' : undefined}
-                  className="flex min-h-[74px] w-full cursor-pointer flex-col justify-center border-0 bg-transparent px-3.5 py-3 pr-14 text-left focus-visible:rounded-lg focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--auth-primary)]"
+                  className="flex min-h-[74px] w-full cursor-pointer flex-col justify-center border-0 bg-transparent px-3.5 py-3 pr-14 text-left focus-visible:rounded-control focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
                   onClick={() => onSelect(item.id)}
                   onKeyDown={(event) =>
                     handleItemKeyDown(event, index)
@@ -167,16 +167,16 @@ export function FeatureListPanel<T extends FeatureListItem>({
                   }}
                   type="button"
                 >
-                  <span className="w-full truncate text-[13px] leading-[1.35] font-bold text-[var(--auth-text)]">
+                  <span className="w-full truncate text-label leading-[1.35] font-bold text-ink">
                     {item.feature}
                   </span>
-                  <span className="mt-1 line-clamp-2 text-[11px] leading-[1.45] text-[var(--auth-muted)]">
+                  <span className="mt-1 line-clamp-2 text-caption leading-[1.45] text-ink-muted">
                     {item.description}
                   </span>
                 </button>
                 <button
                   aria-label={`${item.feature} 수정`}
-                  className="absolute top-3 right-2.5 cursor-pointer border-0 bg-transparent px-1 py-1 text-[11px] font-bold text-[var(--auth-primary)] hover:underline"
+                  className="absolute top-3 right-2.5 cursor-pointer border-0 bg-transparent px-1 py-1 text-caption font-bold text-brand hover:underline"
                   onClick={() => onEdit(item)}
                   type="button"
                 >
@@ -187,7 +187,7 @@ export function FeatureListPanel<T extends FeatureListItem>({
           })}
       </ul>
 
-      <footer className="min-h-12 border-t border-[var(--auth-border)] px-5 text-[11px] leading-12 text-[var(--auth-muted)]">
+      <footer className="min-h-12 border-t border-line px-5 text-caption leading-12 text-ink-muted">
         {footerText}
       </footer>
     </section>

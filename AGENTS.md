@@ -13,6 +13,7 @@ Before changing code, read `CONTRIBUTING.md` and `docs/ARCHITECTURE.md`, then in
 the current branch, `git status`, and recent log. Normal work branches from `develop`
 and returns to `develop` through a pull request. Do not commit directly to `develop` or
 `main`. Only verified releases move from `develop` to `main` through a pull request.
+Read `DESIGN.md` before changing frontend visuals, theme values, or shared UI.
 
 Keep the requested scope narrow. Do not add speculative auth, deployment, or product
 features during a demo-focused task. Preserve unrelated user changes and do not modify

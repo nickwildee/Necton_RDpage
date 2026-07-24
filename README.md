@@ -14,6 +14,7 @@ Necton RD의 인증 화면과 API를 관리하는 저장소입니다. 기존 Dja
 
 - [기여 가이드](CONTRIBUTING.md): Git Flow, 브랜치, 검증, PR 작성 기준
 - [아키텍처](docs/ARCHITECTURE.md): 인증 흐름, FSD 계층, DB와 배포 구조
+- [디자인 시스템](DESIGN.md): Tailwind 토큰, 타이포그래피, 공통 UI 기준
 - [에이전트 작업 규칙](AGENTS.md): 작업 에이전트가 따라야 하는 저장소 규칙
 
 ## Backend
