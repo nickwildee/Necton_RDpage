@@ -6,6 +6,8 @@ matching backend change.
 - Use React, Vite, TypeScript, and Tailwind CSS v4.
 - Prefer Tailwind utility classes for new UI and keep shared theme values in the global
   Tailwind CSS theme instead of scattering hard-coded values.
+- Read `../DESIGN.md` before visual changes. Use its semantic Tailwind tokens and do not
+  add hard-coded colors to components when an existing token represents the same role.
 - Run `npm run lint` and `npm run build` before shipping.
 - Call the backend through relative `/api/` URLs. Do not hard-code EC2 IPs or ports.
 - Use cookie-based sessions with CSRF protection. Do not store passwords or session
