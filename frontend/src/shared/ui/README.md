@@ -1,4 +1,11 @@
 # shared/ui
 
-Reusable, business-agnostic UI kit primitives (buttons, inputs, modals). Not
-tied to any specific feature or entity.
+비즈니스 의미가 없는 공통 UI입니다.
+
+- `Button`: 공통 행동 버튼의 색상과 크기 상태
+- `Alert`: 안내와 오류 메시지
+- `PageHeader`: 페이지 구분 라벨, 제목, 설명
+- `ErrorMessages`: 필드별 오류 목록
+
+폼 상태, API 요청과 도메인 규칙은 이 계층으로 옮기지 않습니다. 입력 필드는 현재
+화면별 밀도가 달라 공통 규격이 확인될 때까지 각 feature에 둡니다.

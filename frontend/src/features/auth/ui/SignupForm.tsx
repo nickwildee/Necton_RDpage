@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ErrorMessages } from '@shared/ui'
+import { Button, ErrorMessages } from '@shared/ui'
 import { useSignupForm } from '../model/useSignupForm'
 import { authInputClassName, authStyles } from './authStyles'
 
@@ -211,13 +211,15 @@ export function SignupForm() {
           />
         </div>
 
-        <button
-          className={authStyles.submit}
-          type="submit"
+        <Button
+          className="mt-1 tracking-interface"
           disabled={isSubmitting}
+          fullWidth
+          size="large"
+          type="submit"
         >
           가입하기
-        </button>
+        </Button>
 
         <p className={authStyles.switchText}>
           이미 계정이 있으신가요?

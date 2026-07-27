@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 import type { FormErrors } from '@shared/api'
-import { ErrorMessages } from '@shared/ui'
+import { Alert, Button, ErrorMessages } from '@shared/ui'
 import type {
   EditorFieldName,
   FeatureEditorState,
@@ -64,10 +64,10 @@ export function FeatureEditorDialog({
       >
         <header className="flex min-h-[72px] items-center justify-between border-b border-line px-6">
           <div>
-            <p className="m-0 text-caption font-bold tracking-[0.08em] text-brand">
+            <p className="m-0 text-caption font-bold tracking-eyebrow text-brand">
               {kindLabel.toUpperCase()}
             </p>
-            <h2 className="mt-1 mb-0 text-xl font-bold tracking-[-0.01em]">
+            <h2 className="mt-1 mb-0 text-xl font-bold tracking-heading">
               {kindLabel} {isCreate ? '추가' : '수정'}
             </h2>
           </div>
@@ -84,12 +84,9 @@ export function FeatureEditorDialog({
 
         <div className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto p-6">
           {error && (
-            <p
-              className="m-0 rounded-control border border-danger-line bg-danger-soft px-3.5 py-3 text-xs leading-5 text-danger"
-              role="alert"
-            >
+            <Alert className="m-0" size="compact" tone="danger">
               {error}
-            </p>
+            </Alert>
           )}
           <ErrorMessages
             className={errorClassName}
@@ -212,32 +209,34 @@ export function FeatureEditorDialog({
         <footer className="flex min-h-[72px] items-center justify-between gap-4 border-t border-line bg-surface-muted px-6">
           <div>
             {!isCreate && (
-              <button
-                className="min-h-10 cursor-pointer rounded-control border border-danger-line-strong bg-surface px-4 text-xs font-bold text-danger hover:bg-danger-soft disabled:cursor-wait disabled:opacity-60"
+              <Button
                 disabled={isSubmitting}
                 onClick={() => void onDelete()}
+                size="compact"
                 type="button"
+                variant="danger"
               >
                 삭제
-              </button>
+              </Button>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              className="min-h-10 cursor-pointer rounded-control border border-line bg-surface px-4 text-xs font-bold text-ink-muted hover:bg-brand-soft disabled:cursor-wait disabled:opacity-60"
+            <Button
               disabled={isSubmitting}
               onClick={onClose}
+              size="compact"
               type="button"
+              variant="neutral"
             >
               취소
-            </button>
-            <button
-              className="min-h-10 cursor-pointer rounded-control border border-brand bg-brand px-5 text-xs font-bold text-white hover:bg-brand-strong disabled:cursor-wait disabled:opacity-60"
+            </Button>
+            <Button
               disabled={isSubmitting}
+              size="compact"
               type="submit"
             >
               {isSubmitting ? '저장 중' : '저장'}
-            </button>
+            </Button>
           </div>
         </footer>
       </form>
