@@ -127,6 +127,7 @@ UI 텍스트는 `tracking-interface`를 사용할 수 있습니다. 데이터 �
 1. Button: primary, secondary, neutral, danger와 화면 밀도별 크기
 2. Alert: notice, danger
 3. Page header: 영문 구분 라벨, 제목, 설명
+4. ErrorMessages: 필드별 오류 목록
 
 Form control은 인증 화면과 관리 다이얼로그의 크기·밀도가 달라 아직 공통화하지
 않습니다. 세 번째 사용 문맥이나 공통 규격이 확인될 때 input, textarea, label,
