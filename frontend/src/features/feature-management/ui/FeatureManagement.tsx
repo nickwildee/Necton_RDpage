@@ -1,5 +1,5 @@
 import { FeatureEditorDialog } from './FeatureEditorDialog'
-import { FeatureListPanel } from './FeatureListPanel'
+import { FeatureHierarchyPanel } from './FeatureHierarchyPanel'
 import { FeatureValueTable } from './FeatureValueTable'
 import { useFeatureManagement } from '../model/useFeatureManagement'
 
@@ -68,35 +68,22 @@ export function FeatureManagement() {
         </p>
       )}
 
-      <div className="grid min-h-[636px] overflow-hidden rounded-panel border border-line bg-surface shadow-panel lg:grid-cols-2 xl:grid-cols-[230px_260px_minmax(0,1fr)]">
-        <FeatureListPanel
-          autoFocusSelected
-          emptyText="등록된 대분류가 없습니다."
-          footerText="대분류를 선택하면 중분류가 표시됩니다."
-          isLoading={isLoadingGroups}
-          items={groups}
-          onAdd={() => openEditor('group', 'create')}
-          onEdit={(group) => openEditor('group', 'edit', group)}
-          onSelect={selectGroup}
-          selectedId={selectedGroupId}
-          title="대분류"
-        />
-        <FeatureListPanel
-          addDisabled={!selectedGroup}
-          emptyText={
-            selectedGroup
-              ? '등록된 중분류가 없습니다.'
-              : '대분류를 선택해 주세요.'
-          }
-          footerText="중분류를 선택하면 소분류가 표시됩니다."
-          hasLeadingDivider
-          isLoading={isLoadingTypes}
-          items={types}
-          onAdd={() => openEditor('type', 'create')}
-          onEdit={(type) => openEditor('type', 'edit', type)}
-          onSelect={selectType}
-          selectedId={selectedTypeId}
-          title="중분류"
+      <div className="grid min-h-[636px] overflow-hidden rounded-panel border border-line bg-surface shadow-panel lg:grid-cols-[300px_minmax(0,1fr)]">
+        <FeatureHierarchyPanel
+          groups={groups}
+          isLoadingGroups={isLoadingGroups}
+          isLoadingTypes={isLoadingTypes}
+          onAddGroup={() => openEditor('group', 'create')}
+          onAddType={() => openEditor('type', 'create')}
+          onEditGroup={(group) => openEditor('group', 'edit', group)}
+          onEditType={(type) => openEditor('type', 'edit', type)}
+          onSelectGroup={selectGroup}
+          onSelectType={selectType}
+          selectedGroup={selectedGroup}
+          selectedGroupId={selectedGroupId}
+          selectedType={selectedType}
+          selectedTypeId={selectedTypeId}
+          types={types}
         />
         <FeatureValueTable
           addDisabled={!selectedType}
