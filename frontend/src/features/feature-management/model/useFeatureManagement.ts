@@ -225,6 +225,10 @@ export function useFeatureManagement() {
   )
 
   const selectGroup = (groupId: number) => {
+    if (groupId === selectedGroupId) {
+      return
+    }
+
     setSelectedTypeId(null)
     setSelectedGroupId(groupId)
   }
