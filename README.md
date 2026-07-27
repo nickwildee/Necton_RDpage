@@ -56,10 +56,16 @@ npm ci
 npm run dev
 npm run lint
 npm run build
+npm run test:e2e
 ```
 
 개발 서버는 상대 경로 `/api/` 요청을 `http://127.0.0.1:8000`의 Django로
 프록시합니다.
+
+E2E 테스트는 `necton_auth_env` Conda 환경을 활성화한 상태에서 실행합니다.
+Playwright가 격리된 SQLite 테스트 DB를 초기화하고 Django와 Vite 테스트 서버를
+각각 `127.0.0.1:8766`, `127.0.0.1:8765`에 실행하므로 MariaDB 데이터에는 영향을
+주지 않습니다.
 
 ## 전환 상태
 
