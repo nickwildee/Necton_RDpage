@@ -204,6 +204,7 @@ export function ProfileSettings() {
                 maxLength={255}
                 name="current_password"
                 onChange={handlePasswordChange}
+                placeholder="현재 비밀번호를 입력하세요"
                 required
                 type="password"
                 value={passwordFields.current_password}
@@ -277,6 +278,7 @@ export function ProfileSettings() {
                 minLength={8}
                 name="new_password_confirm"
                 onChange={handlePasswordChange}
+                placeholder="새 비밀번호를 한 번 더 입력하세요"
                 required
                 type="password"
                 value={passwordFields.new_password_confirm}
