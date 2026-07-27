@@ -4,6 +4,7 @@ import type {
   FeatureGroup,
   FeatureType,
 } from '@entities/document-feature'
+import { FeatureEditIcon } from './FeatureEditIcon'
 
 type NavigableItem = {
   id: number
@@ -45,25 +46,6 @@ function handleListKeyDown<T extends NavigableItem>(
   const nextItem = items[nextIndex]
   onSelect(nextItem.id)
   itemRefs.current.get(nextItem.id)?.focus({ preventScroll: true })
-}
-
-function EditIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="m15.5 5.5 3 3M5 19l3.2-.6L19 7.6 16.4 5 5.6 15.8 5 19Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.7"
-      />
-    </svg>
-  )
 }
 
 const compactButtonClassName =
@@ -152,7 +134,7 @@ export function FeatureHierarchyPanel({
                 title="선택한 대분류 수정"
                 type="button"
               >
-                <EditIcon />
+                <FeatureEditIcon />
               </button>
             </div>
           </div>
@@ -203,7 +185,7 @@ export function FeatureHierarchyPanel({
                 title="선택한 중분류 수정"
                 type="button"
               >
-                <EditIcon />
+                <FeatureEditIcon />
               </button>
             </div>
           </div>
@@ -266,7 +248,6 @@ export function FeatureHierarchyPanel({
             <ul
               aria-label="대분류"
               className="m-0 list-none p-0"
-              role="listbox"
             >
               {groups.map((group, groupIndex) => {
                 const isSelected = selectedGroupId === group.id
@@ -282,7 +263,7 @@ export function FeatureHierarchyPanel({
                       ].join(' ')}
                     >
                       <button
-                        aria-selected={isSelected}
+                        aria-current={isSelected ? 'true' : undefined}
                         className="min-h-11 min-w-0 flex-1 cursor-pointer border-0 bg-transparent px-3.5 text-left text-label font-bold text-ink focus-visible:rounded-control focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
                         onClick={() => onSelectGroup(group.id)}
                         onKeyDown={(event) =>
@@ -301,7 +282,6 @@ export function FeatureHierarchyPanel({
                             groupRefs.current.delete(group.id)
                           }
                         }}
-                        role="option"
                         type="button"
                       >
                         <span className="block truncate">
@@ -320,7 +300,7 @@ export function FeatureHierarchyPanel({
                         title={`${group.feature} 수정`}
                         type="button"
                       >
-                        <EditIcon />
+                        <FeatureEditIcon />
                       </button>
                     </div>
 
@@ -354,7 +334,6 @@ export function FeatureHierarchyPanel({
                           <ul
                             aria-label={`${group.feature} 중분류`}
                             className="m-0 list-none p-0"
-                            role="listbox"
                           >
                             {types.map((type, typeIndex) => {
                               const isTypeSelected =
@@ -371,7 +350,11 @@ export function FeatureHierarchyPanel({
                                     ].join(' ')}
                                   >
                                     <button
-                                      aria-selected={isTypeSelected}
+                                      aria-current={
+                                        isTypeSelected
+                                          ? 'true'
+                                          : undefined
+                                      }
                                       className="min-h-11 min-w-0 flex-1 cursor-pointer border-0 bg-transparent px-3 text-left text-caption font-semibold text-inherit focus-visible:rounded-control focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
                                       onClick={() =>
                                         onSelectType(type.id)
@@ -395,7 +378,6 @@ export function FeatureHierarchyPanel({
                                           typeRefs.current.delete(type.id)
                                         }
                                       }}
-                                      role="option"
                                       type="button"
                                     >
                                       <span className="block truncate">
@@ -414,7 +396,7 @@ export function FeatureHierarchyPanel({
                                       title={`${type.feature} 수정`}
                                       type="button"
                                     >
-                                      <EditIcon />
+                                      <FeatureEditIcon />
                                     </button>
                                   </div>
                                 </li>

@@ -3,31 +3,13 @@ import type {
   FeatureValue,
   FeatureValuePagination,
 } from '@entities/document-feature'
+import { FeatureEditIcon } from './FeatureEditIcon'
 
 function Weight({ value }: { value: number | null }) {
   return (
     <span className="inline-flex h-[26px] min-w-[30px] items-center justify-center rounded-compact border border-line bg-surface-subtle px-1 text-caption font-bold text-ink-secondary tabular-nums">
       {value ?? '—'}
     </span>
-  )
-}
-
-function EditIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="m15.5 5.5 3 3M5 19l3.2-.6L19 7.6 16.4 5 5.6 15.8 5 19Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.7"
-      />
-    </svg>
   )
 }
 
@@ -101,7 +83,7 @@ function ValueActions({
         onClick={() => onEdit(value)}
         tone="edit"
       >
-        <EditIcon />
+        <FeatureEditIcon />
       </ActionButton>
       <ActionButton
         isMobile={isMobile}
