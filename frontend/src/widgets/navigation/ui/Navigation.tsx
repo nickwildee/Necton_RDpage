@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
+import { Button } from '@shared/ui'
 import { useNavigation } from '../model/useNavigation'
 
 const navigationItems = [
@@ -30,9 +31,9 @@ export function Navigation() {
   return (
     <>
       <header className="border-b border-line bg-surface">
-        <div className="mx-auto grid min-h-[72px] max-w-app grid-cols-[auto_1fr_auto] items-center gap-x-10 px-6 max-md:grid-cols-[1fr_auto] max-md:gap-x-4 max-md:py-3 max-sm:grid-cols-1 max-sm:gap-y-2 lg:px-10">
+        <div className="mx-auto grid min-h-[72px] max-w-app grid-cols-[auto_1fr_auto] items-center gap-x-10 px-6 max-lg:grid-cols-[1fr_auto] max-lg:gap-x-4 max-lg:py-3 max-sm:grid-cols-1 max-sm:gap-y-2 lg:px-10">
           <Link
-            className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap text-xl font-bold tracking-[-0.01em] text-ink no-underline focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap text-xl font-bold tracking-heading text-ink no-underline focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand"
             to="/intro"
           >
             Necton RD
@@ -40,7 +41,7 @@ export function Navigation() {
 
           <nav
             aria-label="주요 메뉴"
-            className="flex min-w-0 items-stretch gap-7 max-md:order-3 max-md:col-span-2 max-md:mt-2 max-md:w-full max-md:overflow-x-auto max-md:overscroll-x-contain max-sm:col-span-1 max-sm:mt-1"
+            className="flex min-w-0 items-stretch gap-7 max-lg:order-3 max-lg:col-span-2 max-lg:mt-2 max-lg:w-full max-lg:overflow-x-auto max-lg:overscroll-x-contain max-sm:col-span-1 max-sm:mt-1"
           >
             {navigationItems.map((item) => (
               <NavLink
@@ -79,7 +80,7 @@ export function Navigation() {
             >
               <span
                 aria-hidden="true"
-                className="grid size-8 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold text-white"
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold text-on-brand"
               >
                 {(nickname || email || 'U').charAt(0).toUpperCase()}
               </span>
@@ -92,14 +93,16 @@ export function Navigation() {
                 </span>
               </span>
             </NavLink>
-            <button
-              className="min-h-11 shrink-0 cursor-pointer rounded-control border border-line bg-surface px-3.5 text-sm font-semibold text-brand transition-colors duration-150 hover:border-brand hover:bg-brand-soft focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-60"
+            <Button
+              className="shrink-0"
               disabled={isSubmitting}
               onClick={handleLogout}
+              size="navigation"
               type="button"
+              variant="secondary"
             >
               로그아웃
-            </button>
+            </Button>
           </div>
         </div>
       </header>

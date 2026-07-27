@@ -3,6 +3,7 @@ import type {
   FeatureValue,
   FeatureValuePagination,
 } from '@entities/document-feature'
+import { Button } from '@shared/ui'
 import { FeatureEditIcon } from './FeatureEditIcon'
 
 function Weight({ value }: { value: number | null }) {
@@ -145,7 +146,7 @@ export function FeatureValueTable({
       <header className="flex min-h-20 items-center justify-between gap-4 border-b border-line px-4 py-3 sm:px-6">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h2 className="m-0 line-clamp-2 text-base leading-5 font-bold tracking-[-0.01em] text-ink">
+            <h2 className="m-0 line-clamp-2 text-base leading-5 font-bold tracking-heading text-ink">
               {typeName || '소분류'}
             </h2>
             <span className="text-caption font-bold text-ink-muted">
@@ -161,14 +162,15 @@ export function FeatureValueTable({
               : '중분류를 선택해 주세요.'}
           </p>
         </div>
-        <button
-          className="min-h-11 shrink-0 cursor-pointer rounded-control border border-brand bg-brand px-3.5 text-xs font-bold text-white transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-45"
+        <Button
+          className="shrink-0"
           disabled={addDisabled}
           onClick={onAdd}
+          size="toolbar"
           type="button"
         >
           + 소분류 추가
-        </button>
+        </Button>
       </header>
 
       <div className="hidden min-h-72 flex-1 overflow-x-auto px-5 md:block">
@@ -334,7 +336,7 @@ export function FeatureValueTable({
               className={[
                 'h-11 min-w-11 cursor-pointer rounded-compact border text-caption font-bold md:h-[30px] md:min-w-[30px]',
                 currentPage === pageNumber
-                  ? 'border-brand bg-brand text-white'
+                  ? 'border-brand bg-brand text-on-brand'
                   : 'border-transparent bg-transparent text-ink-muted hover:border-line',
               ].join(' ')}
               disabled={isLoading}

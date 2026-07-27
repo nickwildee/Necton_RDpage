@@ -1,5 +1,5 @@
 import type { UserRole } from '@entities/user'
-import { ErrorMessages } from '@shared/ui'
+import { Alert, Button, ErrorMessages } from '@shared/ui'
 import { useProfileSettings } from '../model/useProfileSettings'
 import { authInputClassName } from './authStyles'
 
@@ -17,16 +17,7 @@ const cardClassName = [
 
 const labelClassName = 'text-label font-semibold text-ink-secondary'
 const errorClassName =
-  'mt-1 mb-0 text-xs leading-[1.5] text-danger'
-const noticeClassName =
-  'mb-4 rounded-control border border-brand-line bg-brand-soft px-3.5 py-3 text-label leading-[1.5] text-brand-strong'
-const submitClassName = [
-  'mt-1 min-h-11 cursor-pointer rounded-control border-0 px-5',
-  'bg-brand text-sm font-bold text-white',
-  'transition-colors duration-150 hover:bg-brand-strong',
-  'focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-focus-ring',
-  'disabled:cursor-wait disabled:opacity-70',
-].join(' ')
+  'mt-1 mb-0 text-xs leading-normal text-danger'
 
 export function ProfileSettings() {
   const {
@@ -59,7 +50,7 @@ export function ProfileSettings() {
         <div className="flex items-center gap-4">
           <span
             aria-hidden="true"
-            className="grid size-14 shrink-0 place-items-center rounded-full bg-brand text-lg font-bold text-white"
+            className="grid size-14 shrink-0 place-items-center rounded-full bg-brand text-lg font-bold text-on-brand"
           >
             {initial}
           </span>
@@ -95,9 +86,9 @@ export function ProfileSettings() {
           </header>
 
           {nicknameMessage && (
-            <p className={noticeClassName} role="status">
+            <Alert className="mb-4">
               {nicknameMessage}
-            </p>
+            </Alert>
           )}
           {nicknameError && (
             <p className={errorClassName} role="alert">
@@ -141,13 +132,13 @@ export function ProfileSettings() {
               />
             </div>
             <div>
-              <button
-                className={submitClassName}
+              <Button
+                className="mt-1"
                 disabled={isNicknameSubmitting}
                 type="submit"
               >
                 닉네임 저장
-              </button>
+              </Button>
             </div>
           </form>
         </section>
@@ -166,9 +157,9 @@ export function ProfileSettings() {
           </header>
 
           {passwordMessage && (
-            <p className={noticeClassName} role="status">
+            <Alert className="mb-4">
               {passwordMessage}
-            </p>
+            </Alert>
           )}
           {passwordError && (
             <p className={errorClassName} role="alert">
@@ -291,13 +282,13 @@ export function ProfileSettings() {
             </div>
 
             <div>
-              <button
-                className={submitClassName}
+              <Button
+                className="mt-1"
                 disabled={isPasswordSubmitting}
                 type="submit"
               >
                 비밀번호 변경
-              </button>
+              </Button>
             </div>
           </form>
         </section>

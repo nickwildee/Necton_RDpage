@@ -51,6 +51,25 @@ function handleListKeyDown<T extends NavigableItem>(
 const compactButtonClassName =
   'inline-flex min-h-9 items-center justify-center rounded-control border border-line bg-surface px-2.5 text-caption font-bold text-brand transition-colors hover:border-brand hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-45'
 
+function SelectChevron() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-ink-muted transition-colors peer-focus:text-brand peer-disabled:opacity-60"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="m7 9 5 5 5-5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  )
+}
+
 export function FeatureHierarchyPanel({
   groups,
   types,
@@ -138,24 +157,27 @@ export function FeatureHierarchyPanel({
               </button>
             </div>
           </div>
-          <select
-            className="min-h-11 w-full rounded-control border border-line bg-surface-field px-3 text-sm text-ink focus:border-brand focus:outline-3 focus:outline-offset-2 focus:outline-focus-ring disabled:opacity-60"
-            disabled={isLoadingGroups || groups.length === 0}
-            id="feature-group-select"
-            onChange={(event) =>
-              onSelectGroup(Number(event.target.value))
-            }
-            value={selectedGroupId ?? ''}
-          >
-            {groups.length === 0 && (
-              <option value="">등록된 대분류가 없습니다.</option>
-            )}
-            {groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.feature}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              className="peer min-h-11 w-full appearance-none rounded-control border border-line bg-surface-field pr-11 pl-3 text-sm text-ink focus:border-brand focus:outline-3 focus:outline-offset-2 focus:outline-focus-ring disabled:opacity-60"
+              disabled={isLoadingGroups || groups.length === 0}
+              id="feature-group-select"
+              onChange={(event) =>
+                onSelectGroup(Number(event.target.value))
+              }
+              value={selectedGroupId ?? ''}
+            >
+              {groups.length === 0 && (
+                <option value="">등록된 대분류가 없습니다.</option>
+              )}
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.feature}
+                </option>
+              ))}
+            </select>
+            <SelectChevron />
+          </div>
         </div>
 
         <div className="grid gap-2">
@@ -189,28 +211,31 @@ export function FeatureHierarchyPanel({
               </button>
             </div>
           </div>
-          <select
-            className="min-h-11 w-full rounded-control border border-line bg-surface-field px-3 text-sm text-ink focus:border-brand focus:outline-3 focus:outline-offset-2 focus:outline-focus-ring disabled:opacity-60"
-            disabled={isLoadingTypes || types.length === 0}
-            id="feature-type-select"
-            onChange={(event) =>
-              onSelectType(Number(event.target.value))
-            }
-            value={selectedTypeId ?? ''}
-          >
-            {types.length === 0 && (
-              <option value="">
-                {selectedGroup
-                  ? '등록된 중분류가 없습니다.'
-                  : '대분류를 선택해 주세요.'}
-              </option>
-            )}
-            {types.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.feature}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              className="peer min-h-11 w-full appearance-none rounded-control border border-line bg-surface-field pr-11 pl-3 text-sm text-ink focus:border-brand focus:outline-3 focus:outline-offset-2 focus:outline-focus-ring disabled:opacity-60"
+              disabled={isLoadingTypes || types.length === 0}
+              id="feature-type-select"
+              onChange={(event) =>
+                onSelectType(Number(event.target.value))
+              }
+              value={selectedTypeId ?? ''}
+            >
+              {types.length === 0 && (
+                <option value="">
+                  {selectedGroup
+                    ? '등록된 중분류가 없습니다.'
+                    : '대분류를 선택해 주세요.'}
+                </option>
+              )}
+              {types.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.feature}
+                </option>
+              ))}
+            </select>
+            <SelectChevron />
+          </div>
         </div>
       </div>
 
