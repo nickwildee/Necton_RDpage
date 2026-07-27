@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from django.conf import settings
@@ -14,12 +15,13 @@ E2E_USER_PASSWORD = "S3cure!Passphrase-7746"
 
 def ensure_isolated_e2e_database():
     database = settings.DATABASES["default"]
-    expected_name = (settings.BASE_DIR / "e2e.sqlite3").resolve()
-    actual_name = Path(database["NAME"]).resolve()
+    expected_name = settings.BASE_DIR / "e2e.sqlite3"
+    actual_name = Path(database["NAME"])
 
     if (
         database["ENGINE"] != "django.db.backends.sqlite3"
-        or actual_name != expected_name
+        or os.path.abspath(actual_name) != os.path.abspath(expected_name)
+        or actual_name.is_symlink()
     ):
         raise CommandError(
             "run_e2e_server는 격리된 backend/e2e.sqlite3에서만 "
