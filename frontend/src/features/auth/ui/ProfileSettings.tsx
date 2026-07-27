@@ -1,5 +1,5 @@
 import type { UserRole } from '@entities/user'
-import { ErrorMessages } from '@shared/ui'
+import { Alert, Button, ErrorMessages } from '@shared/ui'
 import { useProfileSettings } from '../model/useProfileSettings'
 import { authInputClassName } from './authStyles'
 
@@ -11,22 +11,13 @@ const roleLabels: Record<UserRole, string> = {
 }
 
 const cardClassName = [
-  'rounded-xl border border-[var(--auth-border)] bg-[var(--auth-surface)]',
-  'p-6 shadow-[0_2px_20px_rgb(32_39_52_/_5%)] sm:p-7',
+  'rounded-panel border border-line bg-surface',
+  'p-6 shadow-panel-subtle sm:p-7',
 ].join(' ')
 
-const labelClassName = 'text-[13px] font-semibold text-[#565b63]'
+const labelClassName = 'text-label font-semibold text-ink-secondary'
 const errorClassName =
-  'mt-1 mb-0 text-xs leading-[1.5] text-[var(--auth-error)]'
-const noticeClassName =
-  'mb-4 rounded-lg border border-[var(--auth-notice-border)] bg-[var(--auth-notice-background)] px-3.5 py-3 text-[13px] leading-[1.5] text-[var(--auth-primary-hover)]'
-const submitClassName = [
-  'mt-1 min-h-11 cursor-pointer rounded-lg border-0 px-5',
-  'bg-[var(--auth-primary)] text-sm font-bold text-white',
-  'transition-colors duration-150 hover:bg-[var(--auth-primary-hover)]',
-  'focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--auth-focus)]',
-  'disabled:cursor-wait disabled:opacity-70',
-].join(' ')
+  'mt-1 mb-0 text-xs leading-normal text-danger'
 
 export function ProfileSettings() {
   const {
@@ -59,22 +50,22 @@ export function ProfileSettings() {
         <div className="flex items-center gap-4">
           <span
             aria-hidden="true"
-            className="grid size-14 shrink-0 place-items-center rounded-full bg-[var(--auth-primary)] text-lg font-bold text-white"
+            className="grid size-14 shrink-0 place-items-center rounded-full bg-brand text-lg font-bold text-on-brand"
           >
             {initial}
           </span>
           <div className="min-w-0">
             <h2
-              className="m-0 truncate text-lg font-bold text-[var(--auth-text)]"
+              className="m-0 truncate text-lg font-bold text-ink"
               id="account-summary"
             >
               {user.nickname || '닉네임 없음'}
             </h2>
-            <p className="mt-1 mb-0 truncate text-sm text-[var(--auth-muted)]">
+            <p className="mt-1 mb-0 truncate text-sm text-ink-muted">
               {user.email}
             </p>
           </div>
-          <span className="ml-auto shrink-0 rounded-full bg-[var(--auth-notice-background)] px-3 py-1.5 text-xs font-semibold text-[var(--auth-primary-hover)]">
+          <span className="ml-auto shrink-0 rounded-full bg-brand-soft px-3 py-1.5 text-xs font-semibold text-brand-strong">
             {roleLabels[user.role]}
           </span>
         </div>
@@ -84,20 +75,20 @@ export function ProfileSettings() {
         <section className={cardClassName} aria-labelledby="nickname-title">
           <header className="mb-6">
             <h2
-              className="m-0 text-lg font-bold text-[var(--auth-text)]"
+              className="m-0 text-lg font-bold text-ink"
               id="nickname-title"
             >
               닉네임 변경
             </h2>
-            <p className="mt-1.5 mb-0 text-sm leading-6 text-[var(--auth-muted)]">
+            <p className="mt-1.5 mb-0 text-sm leading-6 text-ink-muted">
               네비게이션과 계정 화면에 표시할 이름입니다.
             </p>
           </header>
 
           {nicknameMessage && (
-            <p className={noticeClassName} role="status">
+            <Alert className="mb-4">
               {nicknameMessage}
-            </p>
+            </Alert>
           )}
           {nicknameError && (
             <p className={errorClassName} role="alert">
@@ -141,13 +132,13 @@ export function ProfileSettings() {
               />
             </div>
             <div>
-              <button
-                className={submitClassName}
+              <Button
+                className="mt-1"
                 disabled={isNicknameSubmitting}
                 type="submit"
               >
                 닉네임 저장
-              </button>
+              </Button>
             </div>
           </form>
         </section>
@@ -155,20 +146,20 @@ export function ProfileSettings() {
         <section className={cardClassName} aria-labelledby="password-title">
           <header className="mb-6">
             <h2
-              className="m-0 text-lg font-bold text-[var(--auth-text)]"
+              className="m-0 text-lg font-bold text-ink"
               id="password-title"
             >
               비밀번호 변경
             </h2>
-            <p className="mt-1.5 mb-0 text-sm leading-6 text-[var(--auth-muted)]">
+            <p className="mt-1.5 mb-0 text-sm leading-6 text-ink-muted">
               본인 확인을 위해 현재 비밀번호를 입력해 주세요.
             </p>
           </header>
 
           {passwordMessage && (
-            <p className={noticeClassName} role="status">
+            <Alert className="mb-4">
               {passwordMessage}
-            </p>
+            </Alert>
           )}
           {passwordError && (
             <p className={errorClassName} role="alert">
@@ -204,6 +195,7 @@ export function ProfileSettings() {
                 maxLength={255}
                 name="current_password"
                 onChange={handlePasswordChange}
+                placeholder="현재 비밀번호를 입력하세요"
                 required
                 type="password"
                 value={passwordFields.current_password}
@@ -277,6 +269,7 @@ export function ProfileSettings() {
                 minLength={8}
                 name="new_password_confirm"
                 onChange={handlePasswordChange}
+                placeholder="새 비밀번호를 한 번 더 입력하세요"
                 required
                 type="password"
                 value={passwordFields.new_password_confirm}
@@ -289,13 +282,13 @@ export function ProfileSettings() {
             </div>
 
             <div>
-              <button
-                className={submitClassName}
+              <Button
+                className="mt-1"
                 disabled={isPasswordSubmitting}
                 type="submit"
               >
                 비밀번호 변경
-              </button>
+              </Button>
             </div>
           </form>
         </section>

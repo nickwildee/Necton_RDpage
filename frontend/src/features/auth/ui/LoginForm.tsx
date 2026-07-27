@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ErrorMessages } from '@shared/ui'
+import { Alert, Button, ErrorMessages } from '@shared/ui'
 import { useLoginForm } from '../model/useLoginForm'
 import { authInputClassName, authStyles } from './authStyles'
 
@@ -26,9 +26,9 @@ export function LoginForm() {
       </header>
 
       {notice && (
-        <p className={authStyles.notice} role="status">
+        <Alert className="-mt-5 mb-6">
           {notice}
-        </p>
+        </Alert>
       )}
 
       {globalError && (
@@ -100,13 +100,15 @@ export function LoginForm() {
           />
         </div>
 
-        <button
-          className={authStyles.submit}
-          type="submit"
+        <Button
+          className="mt-1 tracking-interface"
           disabled={isSubmitting}
+          fullWidth
+          size="large"
+          type="submit"
         >
           로그인
-        </button>
+        </Button>
 
         <p className={authStyles.switchText}>
           계정이 없으신가요?

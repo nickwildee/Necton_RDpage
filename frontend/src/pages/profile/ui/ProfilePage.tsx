@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { ProfileSettings } from '@features/auth'
+import { PageHeader } from '@shared/ui'
 
 export function ProfilePage() {
   useEffect(() => {
@@ -11,20 +12,12 @@ export function ProfilePage() {
       aria-labelledby="profile-title"
       className="px-6 pt-[42px] pb-14 lg:px-10"
     >
-      <header className="mb-6">
-        <p className="mt-0 mb-2 text-xs font-bold tracking-[0.08em] text-[var(--auth-primary)]">
-          MY PAGE
-        </p>
-        <h1
-          className="m-0 text-[28px] leading-[1.3] font-bold tracking-[-0.02em] text-[var(--auth-text)]"
-          id="profile-title"
-        >
-          마이페이지
-        </h1>
-        <p className="mt-2 mb-0 text-sm leading-[1.55] text-[var(--auth-muted)]">
-          계정 정보를 확인하고 닉네임과 비밀번호를 변경합니다.
-        </p>
-      </header>
+      <PageHeader
+        description="계정 정보를 확인하고 닉네임과 비밀번호를 변경합니다."
+        eyebrow="MY PAGE"
+        id="profile-title"
+        title="마이페이지"
+      />
 
       <ProfileSettings />
     </section>
