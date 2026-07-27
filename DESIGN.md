@@ -42,8 +42,10 @@ Necton RD의 화면은 차분하고 신뢰감 있는 문서·데이터 관리 �
 | 라벨·목록 제목 | `text-label` | 13px | 600~700 |
 | 상태·개수·표 정보 | `text-caption` | 11px | 600~700 |
 
-페이지 제목은 `tracking-[-0.02em]`, 영문 구분 라벨은 `tracking-[0.08em]`을
-기본으로 합니다. 데이터 숫자에는 `tabular-nums`를 사용합니다.
+페이지 제목과 영문 구분 라벨에는 각각 `tracking-page-title`,
+`tracking-eyebrow`를 사용합니다. 일반 제목은 `tracking-heading`, 버튼처럼 작은
+UI 텍스트는 `tracking-interface`를 사용할 수 있습니다. 데이터 숫자에는
+`tabular-nums`를 사용합니다.
 
 ## 색상
 
@@ -76,6 +78,7 @@ Necton RD의 화면은 차분하고 신뢰감 있는 문서·데이터 관리 �
 | Brand strong | `#40506c` | `bg-brand-strong` | hover와 강조 텍스트 |
 | Brand soft | `#f2f5fa` | `bg-brand-soft` | 선택·안내 배경 |
 | Brand line | `#d7deea` | `border-brand-line` | 선택·안내 테두리 |
+| On brand | `#ffffff` | `text-on-brand` | 브랜드 배경 위의 텍스트와 아이콘 |
 | Danger | `#b42318` | `text-danger` | 오류와 삭제 |
 | Danger soft | `#fff8f7` | `bg-danger-soft` | 오류 배경 |
 | Danger line | `#f0d0cc` | `border-danger-line` | 오류 테두리 |
@@ -118,12 +121,16 @@ Necton RD의 화면은 차분하고 신뢰감 있는 문서·데이터 관리 �
 
 ## 공통 UI 기준
 
-공통 컴포넌트는 실제 중복이 확인된 순서로 만듭니다.
+공통 컴포넌트는 실제 중복이 확인된 순서로 만듭니다. 현재 `shared/ui`에는 다음
+항목이 있습니다.
 
-1. Button: primary, secondary, ghost, danger
-2. Form control: input, textarea, label, error
-3. Alert: notice, danger
-4. Page header: 영문 구분 라벨, 제목, 설명
+1. Button: primary, secondary, neutral, danger와 화면 밀도별 크기
+2. Alert: notice, danger
+3. Page header: 영문 구분 라벨, 제목, 설명
+
+Form control은 인증 화면과 관리 다이얼로그의 크기·밀도가 달라 아직 공통화하지
+않습니다. 세 번째 사용 문맥이나 공통 규격이 확인될 때 input, textarea, label,
+error를 함께 검토합니다.
 
 기능별 상태와 API 동작은 공통 UI로 옮기지 않습니다. 공통 UI는 표시와 상호작용
 상태만 담당하고, FSD 계층의 `shared/ui`에 둡니다.
@@ -144,3 +151,5 @@ Necton RD의 화면은 차분하고 신뢰감 있는 문서·데이터 관리 �
 | 2026-07-24 | 기존 블루그레이 화면에서 토큰을 추출 | 이미 승인된 디자인을 유지하면서 화면 간 일관성을 높이기 위해 |
 | 2026-07-24 | 의미 기반 Tailwind 토큰 사용 | 인증용으로 시작한 색상값을 제품 전체에서 안전하게 사용하기 위해 |
 | 2026-07-24 | 리브랜딩과 다크 모드는 제외 | 현재 데모 범위를 벗어난 확장을 만들지 않기 위해 |
+| 2026-07-27 | Tailwind `@theme`을 토큰 단일 원본으로 유지 | 사용처가 없는 TypeScript 토큰 사본과 동기화 비용을 만들지 않기 위해 |
+| 2026-07-27 | 반복된 Button, Alert, PageHeader만 공통화 | 입력 필드의 문맥별 차이를 억지로 variant로 만들지 않기 위해 |
