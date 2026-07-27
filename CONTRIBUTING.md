@@ -86,6 +86,7 @@ npm ci
 npm run dev
 npm run lint
 npm run build
+npm run test:e2e
 ```
 
 Vite는 상대 `/api/` 요청을 `127.0.0.1:8000`의 Django로 프록시합니다. 프론트와
@@ -118,12 +119,12 @@ Vite는 상대 `/api/` 요청을 `127.0.0.1:8000`의 Django로 프록시합니�
 | --- | --- |
 | Backend | `python manage.py check`, `python manage.py test` |
 | Frontend | `npm run lint`, `npm run build` |
-| 인증 API 또는 화면 | 위 검증 전체와 로그인·회원가입·로그아웃 브라우저 확인 |
+| 인증 API 또는 화면 | 위 검증 전체와 `npm run test:e2e` |
 | 역할별 UI | `SUPER_ADMIN`과 일반 `USER`를 각각 확인 |
 | DB 스키마 | 마이그레이션 포함 여부와 기존 `USER` 테이블 영향 확인 |
 
-현재 프론트엔드에는 자동 테스트 스크립트가 없습니다. 자동 테스트가 추가되기 전까지
-인증 화면 변경은 브라우저 회귀 확인 결과를 PR에 기록합니다.
+E2E 테스트는 격리된 SQLite DB와 전용 포트 `8765`, `8766`을 사용하며 실행할 때마다
+테스트 데이터를 초기화합니다. 실제로 실행한 검증 결과만 PR에 기록합니다.
 
 ## Pull Request
 
