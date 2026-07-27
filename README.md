@@ -29,7 +29,7 @@ Necton RD Page는 문서의 내용과 특성을 분석해 어떤 조항에 해�
 
 ```bash
 conda env create -f backend/environment.yml
-conda activate necton_auth_env
+conda activate necton_auth
 cd backend
 python manage.py check
 python manage.py test
@@ -65,7 +65,7 @@ MariaDB/RDS를 사용할 때는 `backend/.env.example`을 참고해 환경변수
 
 ## Frontend
 
-Node.js 24를 사용합니다.
+Node.js 24 사용을 권장합니다.
 
 ```bash
 cd frontend
@@ -83,7 +83,7 @@ npm run test:e2e
 문서 특성 관리 페이지로 구성됩니다. 공통 색상·타이포그래피·간격은 Tailwind의
 시맨틱 토큰으로 관리하고, 화면과 상태 로직은 FSD 계층 안에서 분리합니다.
 
-E2E 테스트는 `necton_auth_env` Conda 환경을 활성화한 상태에서 실행합니다.
+E2E 테스트는 `necton_auth` Conda 환경을 활성화한 상태에서 실행합니다.
 Playwright가 격리된 SQLite 테스트 DB를 초기화하고 Django와 Vite 테스트 서버를
 각각 `127.0.0.1:8766`, `127.0.0.1:8765`에 실행하므로 MariaDB 데이터에는 영향을
 주지 않습니다. 비로그인 경로 보호, 로그인 성공·실패, 세션 유지와 로그아웃,

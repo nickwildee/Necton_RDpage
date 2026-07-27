@@ -66,7 +66,7 @@ git merge origin/develop --no-edit
 
 ```bash
 conda env create -f backend/environment.yml
-conda activate necton_auth_env
+conda activate necton_auth
 cd backend
 python manage.py check
 python manage.py test

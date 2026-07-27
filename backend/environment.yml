@@ -1,4 +1,4 @@
-name: necton_auth_env
+name: necton_auth
 channels:
   - defaults
 dependencies:
