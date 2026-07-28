@@ -24,6 +24,12 @@ const kindLabels = {
   value: '소분류',
 } as const
 
+const weightFields = [
+  { name: 'cWeight', code: 'C', label: '기밀' },
+  { name: 'sWeight', code: 'S', label: '민감' },
+  { name: 'oWeight', code: 'O', label: '공개' },
+] as const
+
 export function FeatureEditorDialog({
   editor,
   errors,
@@ -175,15 +181,14 @@ export function FeatureEditorDialog({
               <legend className={`${labelClassName} mb-2`}>
                 가중치
               </legend>
-              {(
-                [
-                  ['cWeight', 'C'],
-                  ['sWeight', 'S'],
-                  ['oWeight', 'O'],
-                ] as const
-              ).map(([name, label]) => (
+              {weightFields.map(({ name, code, label }) => (
                 <label className="flex flex-col gap-2" key={name}>
-                  <span className={labelClassName}>{label}</span>
+                  <span className={labelClassName}>
+                    {label}{' '}
+                    <span className="text-caption text-ink-muted">
+                      ({code})
+                    </span>
+                  </span>
                   <input
                     aria-invalid={Boolean(errors[name]?.length)}
                     className={fieldClassName}
