@@ -67,7 +67,7 @@ POST와 PATCH 요청은 `Content-Type: application/json`과 `X-CSRFToken` 헤더
 필요합니다. 비밀번호 변경 후에도 현재 세션은 유지됩니다. API 오류는 `detail`과
 선택적인 필드별 `errors`를 JSON으로 반환합니다.
 
-### 문서 특성 관리 API
+### 문서 특징 관리 API
 
 `/api/settings/feature-groups/`, `/api/settings/feature-types/`,
 `/api/settings/feature-values/`에서 대·중·소분류를 관리합니다. 모든 조회와

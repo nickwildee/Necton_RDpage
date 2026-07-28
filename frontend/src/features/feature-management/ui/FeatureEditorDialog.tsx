@@ -132,7 +132,7 @@ export function FeatureEditorDialog({
                   : undefined
               }
               aria-invalid={Boolean(errors.description?.length)}
-              className={`${fieldClassName} min-h-24 resize-y py-3`}
+              className={`${fieldClassName} min-h-24 resize-none py-3`}
               maxLength={editor.kind === 'group' ? 500 : 255}
               onChange={(event) =>
                 onFieldChange('description', event.target.value)
