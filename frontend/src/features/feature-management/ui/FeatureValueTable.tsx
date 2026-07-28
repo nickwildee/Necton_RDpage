@@ -7,6 +7,11 @@ import { Button } from '@shared/ui'
 import { FeatureEditIcon } from './FeatureEditIcon'
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50]
+const WEIGHT_COLUMNS = [
+  { code: 'C', label: '기밀' },
+  { code: 'S', label: '민감' },
+  { code: 'O', label: '공개' },
+] as const
 
 function Weight({ value }: { value: number | null }) {
   return (
@@ -193,9 +198,16 @@ export function FeatureValueTable({
             <tr className="h-12 border-b border-line text-left text-caption font-bold text-ink-muted">
               <th>항목</th>
               <th className="pr-3">설명</th>
-              <th className="text-center">C</th>
-              <th className="text-center">S</th>
-              <th className="text-center">O</th>
+              {WEIGHT_COLUMNS.map(({ code, label }) => (
+                <th className="text-center" key={code}>
+                  <span className="inline-flex flex-col items-center gap-[3px] leading-none">
+                    <span className="text-[9px] font-semibold text-ink-secondary">
+                      {label}
+                    </span>
+                    <span>{code}</span>
+                  </span>
+                </th>
+              ))}
               <th className="pr-4 text-right">
                 <span className="inline-flex w-20 justify-center">
                   관리
