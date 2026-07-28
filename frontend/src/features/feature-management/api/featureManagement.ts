@@ -144,10 +144,15 @@ export function deleteFeatureType(
   )
 }
 
-export function fetchFeatureValues(typeId: number, page: number) {
+export function fetchFeatureValues(
+  typeId: number,
+  page: number,
+  pageSize: number,
+) {
   const query = new URLSearchParams({
     typeId: String(typeId),
     page: String(page),
+    pageSize: String(pageSize),
   })
   return apiRequest<ValueListResponse>(
     `/api/settings/feature-values/?${query}`,

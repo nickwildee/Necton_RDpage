@@ -44,9 +44,11 @@ export type FeatureEditorState = {
   fields: EditorFields
 }
 
+const DEFAULT_PAGE_SIZE = 10
+
 const EMPTY_PAGINATION: FeatureValuePagination = {
   page: 1,
-  pageSize: 8,
+  pageSize: DEFAULT_PAGE_SIZE,
   totalItems: 0,
   totalPages: 1,
 }
@@ -80,6 +82,7 @@ export function useFeatureManagement() {
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null)
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [isLoadingGroups, setIsLoadingGroups] = useState(true)
   const [isLoadingTypes, setIsLoadingTypes] = useState(false)
   const [isLoadingValues, setIsLoadingValues] = useState(false)
@@ -188,7 +191,7 @@ export function useFeatureManagement() {
     setIsLoadingValues(true)
     setGlobalError(null)
 
-    fetchFeatureValues(selectedTypeId, page)
+    fetchFeatureValues(selectedTypeId, page, pageSize)
       .then((response) => {
         if (!active) {
           return
@@ -213,7 +216,7 @@ export function useFeatureManagement() {
     return () => {
       active = false
     }
-  }, [page, selectedTypeId, typeRevision, valueRevision])
+  }, [page, pageSize, selectedTypeId, typeRevision, valueRevision])
 
   const selectedGroup = useMemo(
     () => groups.find((group) => group.id === selectedGroupId) ?? null,
@@ -236,6 +239,11 @@ export function useFeatureManagement() {
   const selectType = (typeId: number) => {
     setPage(1)
     setSelectedTypeId(typeId)
+  }
+
+  const changePageSize = (nextPageSize: number) => {
+    setPage(1)
+    setPageSize(nextPageSize)
   }
 
   const openEditor = (
@@ -464,6 +472,7 @@ export function useFeatureManagement() {
     selectedGroupId,
     selectedTypeId,
     page,
+    pageSize,
     isLoadingGroups,
     isLoadingTypes,
     isLoadingValues,
@@ -475,6 +484,7 @@ export function useFeatureManagement() {
     selectGroup,
     selectType,
     setPage,
+    changePageSize,
     openEditor,
     closeEditor,
     changeEditorField,
