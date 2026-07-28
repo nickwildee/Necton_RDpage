@@ -6,6 +6,8 @@ import type {
 import { Button } from '@shared/ui'
 import { FeatureEditIcon } from './FeatureEditIcon'
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50]
+
 function Weight({ value }: { value: number | null }) {
   return (
     <span className="inline-flex h-[26px] min-w-[30px] items-center justify-center rounded-compact border border-line bg-surface-subtle px-1 text-caption font-bold text-ink-secondary tabular-nums">
@@ -102,6 +104,7 @@ export function FeatureValueTable({
   values,
   pagination,
   currentPage,
+  pageSize,
   isLoading,
   addDisabled,
   typeName,
@@ -109,10 +112,12 @@ export function FeatureValueTable({
   onEdit,
   onDelete,
   onPageChange,
+  onPageSizeChange,
 }: {
   values: FeatureValue[]
   pagination: FeatureValuePagination
   currentPage: number
+  pageSize: number
   isLoading: boolean
   addDisabled: boolean
   typeName: string | null
@@ -120,6 +125,7 @@ export function FeatureValueTable({
   onEdit: (value: FeatureValue) => void
   onDelete: (value: FeatureValue) => void
   onPageChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
 }) {
   const firstItem =
     pagination.totalItems === 0
@@ -313,9 +319,29 @@ export function FeatureValueTable({
       </div>
 
       <footer className="flex min-h-16 flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2 sm:px-6">
-        <span className="text-caption text-ink-muted">
-          총 {pagination.totalItems}개 · {firstItem}–{lastItem} 표시
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-caption text-ink-muted">
+            총 {pagination.totalItems}개 · {firstItem}–{lastItem} 표시
+          </span>
+          <label className="hidden items-center gap-1.5 text-caption font-semibold text-ink-muted md:flex">
+            페이지당
+            <select
+              aria-label="페이지당 소분류 표시 수"
+              className="h-[30px] rounded-compact border border-line bg-surface-field px-2 text-caption font-bold text-ink focus:border-brand focus:outline-2 focus:outline-offset-1 focus:outline-focus-ring disabled:opacity-60"
+              disabled={isLoading}
+              onChange={(event) =>
+                onPageSizeChange(Number(event.target.value))
+              }
+              value={pageSize}
+            >
+              {PAGE_SIZE_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}개
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
         <nav
           aria-label="소분류 페이지 이동"
           className="ml-auto flex items-center gap-1"

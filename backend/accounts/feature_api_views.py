@@ -12,7 +12,8 @@ from .api_views import (
 )
 from .models import FeatureGroup, FeatureType, FeatureValue, User
 
-FEATURE_VALUE_PAGE_SIZE = 8
+DEFAULT_FEATURE_VALUE_PAGE_SIZE = 10
+MAX_FEATURE_VALUE_PAGE_SIZE = 50
 MISSING = object()
 
 
@@ -142,6 +143,29 @@ def _page_number(request):
     if value < 1:
         return None, _validation_response(
             {"page": ["페이지 번호는 1 이상이어야 합니다."]}
+        )
+    return value, None
+
+
+def _page_size(request):
+    raw_value = request.GET.get(
+        "pageSize",
+        str(DEFAULT_FEATURE_VALUE_PAGE_SIZE),
+    )
+    try:
+        value = int(raw_value)
+    except (TypeError, ValueError):
+        return None, _validation_response(
+            {"pageSize": ["페이지 표시 수는 정수여야 합니다."]}
+        )
+
+    if not 1 <= value <= MAX_FEATURE_VALUE_PAGE_SIZE:
+        return None, _validation_response(
+            {
+                "pageSize": [
+                    "페이지 표시 수는 1 이상 50 이하여야 합니다."
+                ]
+            }
         )
     return value, None
 
@@ -441,6 +465,9 @@ def feature_values(request):
         page, error_response = _page_number(request)
         if error_response:
             return error_response
+        page_size, error_response = _page_size(request)
+        if error_response:
+            return error_response
         if not FeatureType.objects.filter(pk=type_id).exists():
             return _error_response(
                 "중분류를 찾을 수 없습니다.",
@@ -449,7 +476,7 @@ def feature_values(request):
 
         paginator = Paginator(
             FeatureValue.objects.filter(feature_type_id=type_id),
-            FEATURE_VALUE_PAGE_SIZE,
+            page_size,
         )
         page_result = paginator.get_page(page)
         return _json_response(
@@ -460,7 +487,7 @@ def feature_values(request):
                 ],
                 "pagination": {
                     "page": page_result.number,
-                    "pageSize": FEATURE_VALUE_PAGE_SIZE,
+                    "pageSize": page_size,
                     "totalItems": paginator.count,
                     "totalPages": paginator.num_pages,
                 },

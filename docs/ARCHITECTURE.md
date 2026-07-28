@@ -72,7 +72,8 @@ POST와 PATCH 요청은 `Content-Type: application/json`과 `X-CSRFToken` 헤더
 `/api/settings/feature-groups/`, `/api/settings/feature-types/`,
 `/api/settings/feature-values/`에서 대·중·소분류를 관리합니다. 모든 조회와
 변경 요청은 로그인한 `SUPER_ADMIN`만 사용할 수 있고, 변경 요청에는 인증 API와
-같은 CSRF 헤더가 필요합니다. 소분류 목록은 페이지당 8개를 반환합니다.
+같은 CSRF 헤더가 필요합니다. 소분류 목록은 기본 10개를 반환하고 `pageSize`
+쿼리로 페이지당 표시 수를 최대 50개까지 요청할 수 있습니다.
 
 ## 사용자와 역할
 

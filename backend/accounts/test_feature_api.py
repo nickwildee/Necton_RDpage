@@ -318,10 +318,10 @@ class FeatureManagementApiTests(TransactionTestCase):
         )
         self.assertIsNone(feature_value.description)
 
-    def test_value_list_is_paginated_eight_at_a_time(self):
+    def test_value_list_uses_ten_items_per_page_by_default(self):
         group = self.create_group()
         feature_type = self.create_type(group)
-        for index in range(9):
+        for index in range(11):
             self.create_value(
                 group,
                 feature_type,
@@ -334,17 +334,79 @@ class FeatureManagementApiTests(TransactionTestCase):
         first_page = client.get(url, {"typeId": feature_type.pk, "page": 1})
         second_page = client.get(url, {"typeId": feature_type.pk, "page": 2})
 
-        self.assertEqual(len(first_page.json()["items"]), 8)
+        self.assertEqual(len(first_page.json()["items"]), 10)
         self.assertEqual(len(second_page.json()["items"]), 1)
         self.assertEqual(
             first_page.json()["pagination"],
             {
                 "page": 1,
-                "pageSize": 8,
-                "totalItems": 9,
+                "pageSize": 10,
+                "totalItems": 11,
                 "totalPages": 2,
             },
         )
+
+    def test_value_list_accepts_requested_page_size(self):
+        group = self.create_group()
+        feature_type = self.create_type(group)
+        for index in range(15):
+            self.create_value(
+                group,
+                feature_type,
+                feature=f"보안 문서 {index + 1}",
+            )
+        user = self.create_user()
+        client, _ = self.login_client(user)
+
+        for page_size, item_count, total_pages in (
+            (1, 1, 15),
+            (20, 15, 1),
+            (50, 15, 1),
+        ):
+            with self.subTest(page_size=page_size):
+                response = client.get(
+                    reverse("auth_api:feature-values"),
+                    {
+                        "typeId": feature_type.pk,
+                        "page": 1,
+                        "pageSize": page_size,
+                    },
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    len(response.json()["items"]),
+                    item_count,
+                )
+                self.assertEqual(
+                    response.json()["pagination"],
+                    {
+                        "page": 1,
+                        "pageSize": page_size,
+                        "totalItems": 15,
+                        "totalPages": total_pages,
+                    },
+                )
+
+    def test_value_list_rejects_invalid_page_size(self):
+        group = self.create_group()
+        feature_type = self.create_type(group)
+        user = self.create_user()
+        client, _ = self.login_client(user)
+        url = reverse("auth_api:feature-values")
+
+        for page_size in ("not-a-number", "0", "51"):
+            with self.subTest(page_size=page_size):
+                response = client.get(
+                    url,
+                    {
+                        "typeId": feature_type.pk,
+                        "pageSize": page_size,
+                    },
+                )
+
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("pageSize", response.json()["errors"])
 
     def test_type_rename_updates_denormalized_value_names(self):
         group = self.create_group()

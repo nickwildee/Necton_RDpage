@@ -15,6 +15,7 @@ export function FeatureManagement() {
     selectedGroupId,
     selectedTypeId,
     page,
+    pageSize,
     isLoadingGroups,
     isLoadingTypes,
     isLoadingValues,
@@ -26,6 +27,7 @@ export function FeatureManagement() {
     selectGroup,
     selectType,
     setPage,
+    changePageSize,
     openEditor,
     closeEditor,
     changeEditorField,
@@ -93,6 +95,8 @@ export function FeatureManagement() {
           onDelete={(value) => void deleteValue(value)}
           onEdit={(value) => openEditor('value', 'edit', value)}
           onPageChange={setPage}
+          onPageSizeChange={changePageSize}
+          pageSize={pageSize}
           pagination={pagination}
           typeName={selectedType?.feature ?? null}
           values={values}
