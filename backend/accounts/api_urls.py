@@ -1,6 +1,10 @@
 from django.urls import path
 
-from . import api_views, feature_api_views
+from . import (
+    api_views,
+    feature_api_views,
+    image_reference_api_views,
+)
 
 app_name = "auth_api"
 
@@ -41,5 +45,20 @@ urlpatterns = [
         "settings/feature-values/<int:value_id>/",
         feature_api_views.feature_value_detail,
         name="feature-value-detail",
+    ),
+    path(
+        "settings/image-references/",
+        image_reference_api_views.image_references,
+        name="image-references",
+    ),
+    path(
+        "settings/image-references/<int:image_id>/",
+        image_reference_api_views.image_reference_detail,
+        name="image-reference-detail",
+    ),
+    path(
+        "settings/image-references/<int:image_id>/file/",
+        image_reference_api_views.image_reference_file,
+        name="image-reference-file",
     ),
 ]

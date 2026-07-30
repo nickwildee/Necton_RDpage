@@ -13,7 +13,7 @@ export function SettingsPage() {
       className="px-6 pt-[42px] pb-14 lg:px-10"
     >
       <PageHeader
-        description="문서 특징을 대분류, 중분류, 소분류 순서로 선택하고 관리합니다."
+        description="문서 분류 기준과 참조 이미지를 관리합니다."
         eyebrow="SETTINGS"
         id="settings-title"
         title="문서 특징 관리"

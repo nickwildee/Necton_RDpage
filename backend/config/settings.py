@@ -204,3 +204,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# 실제 경로는 서버 환경에서만 주입한다. DB와 API에는 이 경로 아래의 상대 경로만
+# 저장하거나 반환하며, 설정되지 않은 환경에서는 이미지 업로드와 조회만 거부한다.
+BDM_IMAGE_ROOT = os.environ.get("BDM_IMAGE_ROOT")
