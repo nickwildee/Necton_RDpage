@@ -117,9 +117,13 @@ export function ImageReferenceManagement({
   selectedValue: FeatureValue | null
 }) {
   const carouselRef = useRef<HTMLDivElement>(null)
+  const selectedValueId = selectedValue?.id ?? null
+  const [isExpanded, setIsExpanded] = useState(
+    selectedValueId !== null,
+  )
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
-  const management = useImageReferences(selectedValue?.id ?? null)
+  const management = useImageReferences(selectedValueId)
   const {
     images,
     pagination,
@@ -140,6 +144,10 @@ export function ImageReferenceManagement({
     deactivateEditorItem,
     deactivateItem,
   } = management
+
+  useEffect(() => {
+    setIsExpanded(selectedValueId !== null)
+  }, [selectedValueId])
 
   const syncScrollState = useCallback(() => {
     const carousel = carouselRef.current
@@ -168,7 +176,7 @@ export function ImageReferenceManagement({
       window.cancelAnimationFrame(frame)
       resizeObserver?.disconnect()
     }
-  }, [images, syncScrollState])
+  }, [images, isExpanded, syncScrollState])
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
     const carousel = event.currentTarget
@@ -209,8 +217,41 @@ export function ImageReferenceManagement({
   return (
     <>
       <section className="border-t border-line bg-surface-muted">
-        <header className="flex min-h-[72px] items-center justify-between gap-4 border-b border-line px-4 py-3 sm:px-6">
-          <div className="min-w-0">
+        <header
+          className={[
+            'flex min-h-[76px] items-center justify-between gap-4 px-4 py-3 sm:px-6',
+            isExpanded ? 'border-b border-line' : '',
+          ].join(' ')}
+        >
+          <button
+            aria-controls="image-reference-content"
+            aria-expanded={isExpanded}
+            aria-label={
+              selectedValue
+                ? `${selectedValue.feature} 이미지 ${isExpanded ? '접기' : '펼치기'}`
+                : '등록 이미지'
+            }
+            className="group inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-control border border-line bg-surface p-0 text-brand transition-colors hover:border-brand focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-default disabled:text-ink-disabled"
+            disabled={!selectedValue}
+            onClick={() => setIsExpanded((current) => !current)}
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              className="size-5"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d={isExpanded ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6'}
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
+          </button>
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="m-0 truncate text-base font-bold tracking-heading text-ink">
                 {selectedValue
@@ -223,94 +264,102 @@ export function ImageReferenceManagement({
             </div>
             <p className="mt-1 mb-0 truncate text-caption text-ink-muted">
               {selectedValue
-                ? '선택한 소분류에 사용할 실제 참조 이미지입니다.'
+                ? isExpanded
+                  ? '선택한 소분류에 등록된 참조 이미지입니다.'
+                  : '눌러서 이미지 등록과 기존 목록을 펼칩니다.'
                 : '소분류를 선택하면 등록 이미지를 확인할 수 있습니다.'}
             </p>
           </div>
-          <Button
-            className="shrink-0"
-            disabled={!selectedValue}
-            onClick={openCreate}
-            size="toolbar"
-            type="button"
-          >
-            + 이미지 등록
-          </Button>
+          {selectedValue && isExpanded && (
+            <Button
+              className="shrink-0"
+              onClick={openCreate}
+              size="toolbar"
+              type="button"
+            >
+              + 이미지 등록
+            </Button>
+          )}
         </header>
 
-        {error && (
-          <Alert className="mx-4 mt-4 sm:mx-6" size="compact" tone="danger">
-            {error}
-          </Alert>
-        )}
-
-        {!selectedValue && (
-          <p className="m-0 px-6 py-16 text-center text-xs text-ink-muted">
-            위 목록에서 소분류를 선택해 주세요.
-          </p>
-        )}
-        {selectedValue && isLoading && (
-          <p className="m-0 px-6 py-16 text-center text-xs text-ink-muted">
-            이미지를 불러오는 중입니다.
-          </p>
-        )}
-        {selectedValue && !isLoading && images.length === 0 && (
-          <p className="m-0 px-6 py-16 text-center text-xs text-ink-muted">
-            등록된 이미지가 없습니다. 첫 이미지를 등록해 주세요.
-          </p>
-        )}
-
-        {selectedValue && images.length > 0 && (
-          <div className="px-3 py-4 sm:px-5">
-            <div className="grid grid-cols-[36px_minmax(0,1fr)_36px] items-center gap-2">
-              <ArrowButton
-                direction="left"
-                disabled={!canScrollLeft}
-                onClick={() => scroll('left')}
-              />
-              <div
-                aria-label={`${selectedValue.feature} 등록 이미지`}
-                className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                onScroll={handleScroll}
-                ref={carouselRef}
-                tabIndex={0}
+        {isExpanded && (
+          <div id="image-reference-content">
+            {error && (
+              <Alert
+                className="mx-4 mt-4 sm:mx-6"
+                size="compact"
+                tone="danger"
               >
-                {images.map((image) => (
+                {error}
+              </Alert>
+            )}
+
+            {selectedValue && isLoading && (
+              <p className="m-0 px-6 py-16 text-center text-xs text-ink-muted">
+                이미지를 불러오는 중입니다.
+              </p>
+            )}
+            {selectedValue && !isLoading && images.length === 0 && (
+              <p className="m-0 px-6 py-16 text-center text-xs text-ink-muted">
+                등록된 이미지가 없습니다. 첫 이미지를 등록해 주세요.
+              </p>
+            )}
+
+            {selectedValue && images.length > 0 && (
+              <div className="px-3 py-4 sm:px-5">
+                <div className="grid grid-cols-[36px_minmax(0,1fr)_36px] items-center gap-2">
+                  <ArrowButton
+                    direction="left"
+                    disabled={!canScrollLeft}
+                    onClick={() => scroll('left')}
+                  />
                   <div
-                    className="w-[82%] shrink-0 snap-start sm:w-[calc((100%_-_1.5rem)/3)] lg:w-[calc((100%_-_2.25rem)/4)]"
-                    key={image.id}
+                    aria-label={`${selectedValue.feature} 등록 이미지`}
+                    className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    onScroll={handleScroll}
+                    ref={carouselRef}
+                    tabIndex={0}
                   >
-                    <ImageCard
-                      image={image}
-                      onDeactivate={(item) => void deactivateItem(item)}
-                      onEdit={openEdit}
-                    />
+                    {images.map((image) => (
+                      <div
+                        className="w-[82%] shrink-0 snap-start sm:w-[calc((100%_-_1.5rem)/3)] lg:w-[calc((100%_-_2.25rem)/4)]"
+                        key={image.id}
+                      >
+                        <ImageCard
+                          image={image}
+                          onDeactivate={(item) =>
+                            void deactivateItem(item)
+                          }
+                          onEdit={openEdit}
+                        />
+                      </div>
+                    ))}
+                    {isLoadingMore && (
+                      <div className="grid min-w-[180px] place-items-center text-caption text-ink-muted">
+                        더 불러오는 중
+                      </div>
+                    )}
                   </div>
-                ))}
-                {isLoadingMore && (
-                  <div className="grid min-w-[180px] place-items-center text-caption text-ink-muted">
-                    더 불러오는 중
-                  </div>
-                )}
+                  <ArrowButton
+                    direction="right"
+                    disabled={
+                      !canScrollRight &&
+                      pagination.page >= pagination.totalPages
+                    }
+                    onClick={() => scroll('right')}
+                  />
+                </div>
+                <div className="mx-auto mt-2 h-1 w-28 overflow-hidden rounded-full bg-line">
+                  <div
+                    className="h-full rounded-full bg-brand transition-[width]"
+                    style={{ width: `${loadedRatio}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 mb-0 text-center text-caption text-ink-muted">
+                  {images.length} / {pagination.totalItems}개 불러옴
+                </p>
               </div>
-              <ArrowButton
-                direction="right"
-                disabled={
-                  !canScrollRight &&
-                  pagination.page >= pagination.totalPages
-                }
-                onClick={() => scroll('right')}
-              />
-            </div>
-            <div className="mx-auto mt-2 h-1 w-28 overflow-hidden rounded-full bg-line">
-              <div
-                className="h-full rounded-full bg-brand transition-[width]"
-                style={{ width: `${loadedRatio}%` }}
-              />
-            </div>
-            <p className="mt-1.5 mb-0 text-center text-caption text-ink-muted">
-              {images.length} / {pagination.totalItems}개 불러옴
-            </p>
+            )}
           </div>
         )}
       </section>

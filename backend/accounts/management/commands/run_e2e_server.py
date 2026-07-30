@@ -91,6 +91,17 @@ def create_e2e_features():
         s_weight=80,
         o_weight=10,
     )
+    FeatureValue.objects.create(
+        feature_group=group,
+        feature_type=feature_type,
+        feature_value_id=12,
+        feature_type_name=feature_type.feature,
+        feature="군기관로고",
+        description="국방부, 합참, 육·해·공군 등 관련 기관",
+        c_weight=30,
+        s_weight=70,
+        o_weight=20,
+    )
 
 
 class Command(BaseCommand):

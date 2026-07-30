@@ -1,5 +1,6 @@
 import type { KeyboardEvent, ReactNode } from 'react'
 import type {
+  FeatureType,
   FeatureValue,
   FeatureValuePagination,
 } from '@entities/document-feature'
@@ -19,6 +20,39 @@ function Weight({ value }: { value: number | null }) {
     <span className="inline-flex h-[26px] min-w-[30px] items-center justify-center rounded-compact border border-line bg-surface-subtle px-1 text-caption font-bold text-ink-secondary tabular-nums">
       {value ?? '—'}
     </span>
+  )
+}
+
+function ImageTypeMetadata({
+  featureType,
+}: {
+  featureType: FeatureType
+}) {
+  return (
+    <dl className="mt-2 mb-0 flex min-w-0 flex-wrap gap-2">
+      {[
+        ['물리적 형태', featureType.physicalType],
+        ['객체 역할', featureType.semanticRole],
+      ].map(([label, value], index) => (
+        <div
+          className={[
+            'min-w-0 rounded-control border border-line bg-surface-subtle px-3 py-2',
+            index === 0 ? 'w-36 shrink-0' : 'max-w-full flex-1 basis-64',
+          ].join(' ')}
+          key={label}
+        >
+          <dt className="text-caption font-bold text-ink-muted">
+            {label}
+          </dt>
+          <dd
+            className="mt-1 mb-0 truncate text-caption font-bold text-brand-strong"
+            title={value || '미입력'}
+          >
+            {value || '미입력'}
+          </dd>
+        </div>
+      ))}
+    </dl>
   )
 }
 
@@ -98,6 +132,7 @@ export function FeatureValueTable({
   isLoading,
   addDisabled,
   typeName,
+  imageType,
   onAdd,
   onEdit,
   onDelete,
@@ -113,6 +148,7 @@ export function FeatureValueTable({
   isLoading: boolean
   addDisabled: boolean
   typeName: string | null
+  imageType: FeatureType | null
   onAdd: () => void
   onEdit: (value: FeatureValue) => void
   onDelete: (value: FeatureValue) => void
@@ -143,8 +179,8 @@ export function FeatureValueTable({
 
   return (
     <section className="flex min-w-0 flex-col bg-surface lg:min-h-[636px]">
-      <header className="flex min-h-20 items-center justify-between gap-4 border-b border-line px-4 py-3 sm:px-6">
-        <div className="min-w-0">
+      <header className="flex min-h-20 items-start justify-between gap-4 border-b border-line px-4 py-3 sm:px-6">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <h2 className="m-0 line-clamp-2 text-base leading-5 font-bold tracking-heading text-ink">
               {typeName || '소분류'}
@@ -156,11 +192,15 @@ export function FeatureValueTable({
               {pagination.totalItems}
             </span>
           </div>
-          <p className="mt-1 mb-0 truncate text-caption text-ink-muted">
-            {typeName
-              ? `${typeName}에 속한 실제 데이터입니다.`
-              : '중분류를 선택해 주세요.'}
-          </p>
+          {imageType ? (
+            <ImageTypeMetadata featureType={imageType} />
+          ) : (
+            <p className="mt-1 mb-0 truncate text-caption text-ink-muted">
+              {typeName
+                ? `${typeName}에 속한 실제 데이터입니다.`
+                : '중분류를 선택해 주세요.'}
+            </p>
+          )}
         </div>
         <Button
           className="shrink-0"
