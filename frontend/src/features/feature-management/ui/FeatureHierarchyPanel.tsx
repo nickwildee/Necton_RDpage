@@ -4,7 +4,6 @@ import type {
   FeatureGroup,
   FeatureType,
 } from '@entities/document-feature'
-import { DOCUMENT_IMAGE_GROUP_ID } from '@entities/document-feature'
 import { FeatureEditIcon } from './FeatureEditIcon'
 
 type NavigableItem = {
@@ -68,29 +67,6 @@ function SelectChevron() {
         strokeWidth="1.8"
       />
     </svg>
-  )
-}
-
-function ImageTypeMetadata({
-  featureType,
-}: {
-  featureType: FeatureType
-}) {
-  return (
-    <span className="mt-2 flex min-w-0 flex-wrap gap-1.5">
-      {[
-        ['물리적 형태', featureType.physicalType],
-        ['객체 역할', featureType.semanticRole],
-      ].map(([label, value]) => (
-        <span
-          className="max-w-full truncate rounded-compact border border-brand-line bg-surface/75 px-2 py-1 text-caption leading-3 font-bold text-brand-strong"
-          key={label}
-          title={`${label} · ${value || '미입력'}`}
-        >
-          {label} · {value || '미입력'}
-        </span>
-      ))}
-    </span>
   )
 }
 
@@ -269,17 +245,12 @@ export function FeatureHierarchyPanel({
             <SelectChevron />
           </div>
           {selectedType && (
-            <>
-              <p
-                className="m-0 truncate px-1 text-caption leading-5 text-ink-muted"
-                title={selectedType.description}
-              >
-                {selectedType.description}
-              </p>
-              {selectedGroupId === DOCUMENT_IMAGE_GROUP_ID && (
-                <ImageTypeMetadata featureType={selectedType} />
-              )}
-            </>
+            <p
+              className="m-0 truncate px-1 text-caption leading-5 text-ink-muted"
+              title={selectedType.description}
+            >
+              {selectedType.description}
+            </p>
           )}
         </div>
       </div>
@@ -470,20 +441,12 @@ export function FeatureHierarchyPanel({
                                         {type.feature}
                                       </span>
                                       {isTypeSelected && (
-                                        <>
-                                          <span
-                                            className="mt-1 block truncate text-caption leading-4 font-normal text-ink-muted"
-                                            title={type.description}
-                                          >
-                                            {type.description}
-                                          </span>
-                                          {selectedGroupId ===
-                                            DOCUMENT_IMAGE_GROUP_ID && (
-                                            <ImageTypeMetadata
-                                              featureType={type}
-                                            />
-                                          )}
-                                        </>
+                                        <span
+                                          className="mt-1 block truncate text-caption leading-4 font-normal text-ink-muted"
+                                          title={type.description}
+                                        >
+                                          {type.description}
+                                        </span>
                                       )}
                                     </button>
                                     <button

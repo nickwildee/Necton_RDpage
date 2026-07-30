@@ -18,11 +18,15 @@ test('Document Image 소분류를 선택하고 이미지를 등록한다', async
   await login(page)
   await page.goto('/intro/settings')
 
+  const valueHeader = page
+    .getByRole('heading', { name: 'Logo', exact: true })
+    .locator('xpath=ancestor::header')
+
   await expect(
-    page.getByText('물리적 형태 · Raster image').last(),
+    valueHeader.getByText('Raster image', { exact: true }),
   ).toBeVisible()
   await expect(
-    page.getByText('객체 역할 · Organization identity').last(),
+    valueHeader.getByText('Organization identity', { exact: true }),
   ).toBeVisible()
   await expect(
     page.getByText('소분류를 선택하면 등록 이미지를 확인할 수 있습니다.'),
@@ -42,6 +46,43 @@ test('Document Image 소분류를 선택하고 이미지를 등록한다', async
   await expect(
     page.getByText('등록된 이미지가 없습니다. 첫 이미지를 등록해 주세요.'),
   ).toBeVisible()
+
+  await page
+    .getByRole('button', {
+      name: '국가안보기관로고 이미지 접기',
+    })
+    .click()
+  await expect(
+    page.getByRole('button', { name: '+ 이미지 등록' }),
+  ).toBeHidden()
+  await expect(
+    page.getByText('등록된 이미지가 없습니다. 첫 이미지를 등록해 주세요.'),
+  ).toBeHidden()
+
+  await page
+    .getByRole('row', {
+      name: /군기관로고 국방부/,
+    })
+    .click()
+  await expect(
+    page.getByRole('button', {
+      name: '군기관로고 이미지 접기',
+    }),
+  ).toHaveAttribute('aria-expanded', 'true')
+  await expect(
+    page.getByRole('button', { name: '+ 이미지 등록' }),
+  ).toBeVisible()
+
+  await page
+    .getByRole('row', {
+      name: /국가안보기관로고 국가안보실/,
+    })
+    .click()
+  await page
+    .getByRole('button', {
+      name: '국가안보기관로고 이미지 접기',
+    })
+    .waitFor()
 
   await page.getByRole('button', { name: '+ 이미지 등록' }).click()
   await page.locator('input[type="file"]').setInputFiles({

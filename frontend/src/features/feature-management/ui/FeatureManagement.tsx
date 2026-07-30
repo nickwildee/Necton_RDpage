@@ -97,6 +97,11 @@ export function FeatureManagement() {
             addDisabled={!selectedType}
             currentPage={page}
             isLoading={isLoadingValues}
+            imageType={
+              selectedGroup?.id === DOCUMENT_IMAGE_GROUP_ID
+                ? selectedType
+                : null
+            }
             onAdd={() => openEditor('value', 'create')}
             onDelete={(value) => void deleteValue(value)}
             onEdit={(value) => openEditor('value', 'edit', value)}
