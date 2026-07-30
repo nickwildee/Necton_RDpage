@@ -58,10 +58,10 @@ function ImageCard({
           {image.description}
         </p>
         <div className="mt-3 flex items-center justify-between gap-3 border-t border-line-subtle pt-2.5">
-          <span className="text-caption text-ink-muted">
+          <span className="shrink-0 whitespace-nowrap text-caption text-ink-muted">
             {formatDate(image.registeredAt)}
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex shrink-0 items-center gap-1.5">
             <button
               aria-label={`${image.originName} 설명 수정`}
               className="inline-flex size-11 cursor-pointer items-center justify-center rounded-compact border border-line bg-surface text-brand hover:border-brand hover:bg-brand-soft focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand md:size-8"
@@ -101,7 +101,7 @@ function ArrowButton({
   return (
     <button
       aria-label={label}
-      className="inline-flex h-12 w-9 cursor-pointer items-center justify-center self-center rounded-control border border-line bg-surface text-2xl text-brand shadow-panel-subtle hover:border-brand disabled:cursor-not-allowed disabled:opacity-30"
+      className="hidden h-12 w-11 cursor-pointer items-center justify-center self-center rounded-control border border-line bg-surface text-2xl text-brand shadow-panel-subtle hover:border-brand disabled:cursor-not-allowed disabled:opacity-30 sm:inline-flex"
       disabled={disabled}
       onClick={onClick}
       type="button"
@@ -307,7 +307,7 @@ export function ImageReferenceManagement({
 
             {selectedValue && images.length > 0 && (
               <div className="px-3 py-4 sm:px-5">
-                <div className="grid grid-cols-[36px_minmax(0,1fr)_36px] items-center gap-2">
+                <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[44px_minmax(0,1fr)_44px]">
                   <ArrowButton
                     direction="left"
                     disabled={!canScrollLeft}
@@ -322,7 +322,7 @@ export function ImageReferenceManagement({
                   >
                     {images.map((image) => (
                       <div
-                        className="w-[82%] shrink-0 snap-start sm:w-[calc((100%_-_1.5rem)/3)] lg:w-[calc((100%_-_2.25rem)/4)]"
+                        className="w-60 shrink-0 snap-start sm:w-64"
                         key={image.id}
                       >
                         <ImageCard
