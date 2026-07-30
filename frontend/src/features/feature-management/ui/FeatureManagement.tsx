@@ -1,6 +1,8 @@
+import { DOCUMENT_IMAGE_GROUP_ID } from '@entities/document-feature'
 import { FeatureEditorDialog } from './FeatureEditorDialog'
 import { FeatureHierarchyPanel } from './FeatureHierarchyPanel'
 import { FeatureValueTable } from './FeatureValueTable'
+import { ImageReferenceManagement } from './ImageReferenceManagement'
 import { useFeatureManagement } from '../model/useFeatureManagement'
 
 export function FeatureManagement() {
@@ -12,8 +14,10 @@ export function FeatureManagement() {
     pagination,
     selectedGroup,
     selectedType,
+    selectedValue,
     selectedGroupId,
     selectedTypeId,
+    selectedValueId,
     page,
     pageSize,
     isLoadingGroups,
@@ -26,7 +30,8 @@ export function FeatureManagement() {
     isSubmitting,
     selectGroup,
     selectType,
-    setPage,
+    selectValue,
+    changePage,
     changePageSize,
     openEditor,
     closeEditor,
@@ -87,20 +92,30 @@ export function FeatureManagement() {
           selectedTypeId={selectedTypeId}
           types={types}
         />
-        <FeatureValueTable
-          addDisabled={!selectedType}
-          currentPage={page}
-          isLoading={isLoadingValues}
-          onAdd={() => openEditor('value', 'create')}
-          onDelete={(value) => void deleteValue(value)}
-          onEdit={(value) => openEditor('value', 'edit', value)}
-          onPageChange={setPage}
-          onPageSizeChange={changePageSize}
-          pageSize={pageSize}
-          pagination={pagination}
-          typeName={selectedType?.feature ?? null}
-          values={values}
-        />
+        <div className="min-w-0">
+          <FeatureValueTable
+            addDisabled={!selectedType}
+            currentPage={page}
+            isLoading={isLoadingValues}
+            onAdd={() => openEditor('value', 'create')}
+            onDelete={(value) => void deleteValue(value)}
+            onEdit={(value) => openEditor('value', 'edit', value)}
+            onPageChange={changePage}
+            onPageSizeChange={changePageSize}
+            onSelect={selectValue}
+            pageSize={pageSize}
+            pagination={pagination}
+            selectedValueId={selectedValueId}
+            typeName={selectedType?.feature ?? null}
+            values={values}
+          />
+          {selectedGroup?.id === DOCUMENT_IMAGE_GROUP_ID &&
+            selectedType && (
+              <ImageReferenceManagement
+                selectedValue={selectedValue}
+              />
+            )}
+        </div>
       </div>
 
       {editor && (
@@ -113,6 +128,10 @@ export function FeatureManagement() {
           onDelete={deleteEditorItem}
           onFieldChange={changeEditorField}
           onSubmit={submitEditor}
+          showImageTypeFields={
+            editor.kind === 'type' &&
+            selectedGroup?.id === DOCUMENT_IMAGE_GROUP_ID
+          }
         />
       )}
     </>

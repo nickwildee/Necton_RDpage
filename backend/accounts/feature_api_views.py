@@ -10,7 +10,13 @@ from .api_views import (
     _json_response,
     _read_json_object,
 )
-from .models import FeatureGroup, FeatureType, FeatureValue, User
+from .models import (
+    FeatureGroup,
+    FeatureType,
+    FeatureValue,
+    ImageReference,
+    User,
+)
 
 DEFAULT_FEATURE_VALUE_PAGE_SIZE = 10
 MAX_FEATURE_VALUE_PAGE_SIZE = 50
@@ -185,6 +191,8 @@ def _type_payload(feature_type):
         "feature": feature_type.feature,
         "description": feature_type.description,
         "note": feature_type.note,
+        "physicalType": feature_type.physical_type,
+        "semanticRole": feature_type.semantic_role,
     }
 
 
@@ -229,11 +237,31 @@ def _type_values(payload, *, partial):
     values = {}
     errors = {}
     fields = (
-        ("feature", "중분류 이름", 255, True),
-        ("description", "중분류 설명", 255, True),
-        ("note", "메모", 100, False),
+        ("feature", "중분류 이름", 255, True, "feature"),
+        (
+            "description",
+            "중분류 설명",
+            255,
+            True,
+            "description",
+        ),
+        ("note", "메모", 100, False, "note"),
+        (
+            "physicalType",
+            "물리적 형태",
+            255,
+            False,
+            "physical_type",
+        ),
+        (
+            "semanticRole",
+            "객체 역할",
+            255,
+            False,
+            "semantic_role",
+        ),
     )
-    for key, label, max_length, required in fields:
+    for key, label, max_length, required, model_field in fields:
         value, error = _text_value(
             payload,
             key,
@@ -245,8 +273,24 @@ def _type_values(payload, *, partial):
         if error:
             errors.setdefault(key, []).append(error)
         elif value is not MISSING:
-            values[key] = value
+            values[model_field] = value
     return values, errors
+
+
+def _image_type_field_errors(group_id, values):
+    if group_id == FeatureGroup.DOCUMENT_IMAGE_ID:
+        return {}
+
+    errors = {}
+    for api_key, model_field, label in (
+        ("physicalType", "physical_type", "물리적 형태"),
+        ("semanticRole", "semantic_role", "객체 역할"),
+    ):
+        if values.get(model_field) is not None:
+            errors[api_key] = [
+                f"{label}은(는) Document Image 중분류에서만 사용할 수 있습니다."
+            ]
+    return errors
 
 
 def _value_values(payload, *, partial):
@@ -398,6 +442,9 @@ def feature_types(request):
     group = FeatureGroup.objects.filter(pk=group_id).first()
     if group is None:
         return _error_response("대분류를 찾을 수 없습니다.", status=404)
+    image_field_errors = _image_type_field_errors(group_id, values)
+    if image_field_errors:
+        return _validation_response(image_field_errors)
 
     feature_type = FeatureType.objects.create(
         feature_group=group,
@@ -431,6 +478,12 @@ def feature_type_detail(request, type_id):
         return error_response
 
     values, errors = _type_values(payload, partial=True)
+    errors.update(
+        _image_type_field_errors(
+            feature_type.feature_group_id,
+            values,
+        )
+    )
     if errors:
         return _validation_response(errors)
     if not values:
@@ -542,13 +595,31 @@ def feature_values(request):
 @_database_errors
 @_super_admin_required
 def feature_value_detail(request, value_id):
+    if request.method == "DELETE":
+        with transaction.atomic():
+            feature_value = (
+                FeatureValue.objects.select_for_update()
+                .filter(pk=value_id)
+                .first()
+            )
+            if feature_value is None:
+                return _error_response(
+                    "소분류를 찾을 수 없습니다.",
+                    status=404,
+                )
+            if ImageReference.objects.filter(
+                feature_value_id=value_id
+            ).exists():
+                return _error_response(
+                    "등록 이미지가 있는 소분류는 삭제할 수 없습니다.",
+                    status=409,
+                )
+            feature_value.delete()
+        return _json_response({"detail": "소분류를 삭제했습니다."})
+
     feature_value = FeatureValue.objects.filter(pk=value_id).first()
     if feature_value is None:
         return _error_response("소분류를 찾을 수 없습니다.", status=404)
-
-    if request.method == "DELETE":
-        feature_value.delete()
-        return _json_response({"detail": "소분류를 삭제했습니다."})
 
     payload, error_response = _read_json_object(request)
     if error_response:

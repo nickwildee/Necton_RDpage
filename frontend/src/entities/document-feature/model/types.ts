@@ -1,3 +1,5 @@
+export const DOCUMENT_IMAGE_GROUP_ID = 3
+
 export type FeatureGroup = {
   id: number
   feature: string
@@ -10,6 +12,8 @@ export type FeatureType = {
   feature: string
   description: string
   note: string | null
+  physicalType: string | null
+  semanticRole: string | null
 }
 
 export type FeatureValue = {
@@ -25,6 +29,24 @@ export type FeatureValue = {
 }
 
 export type FeatureValuePagination = {
+  page: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+}
+
+export type ImageReference = {
+  id: number
+  valueId: number
+  originName: string
+  storedName: string
+  description: string
+  registeredAt: string
+  updatedAt: string
+  fileUrl: string
+}
+
+export type ImageReferencePagination = {
   page: number
   pageSize: number
   totalItems: number

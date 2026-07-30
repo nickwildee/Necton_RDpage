@@ -8,6 +8,7 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+backend/.e2e-images/
 node_modules/
 dist/
 .vite/

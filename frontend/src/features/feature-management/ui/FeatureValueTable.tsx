@@ -1,9 +1,10 @@
-import type { ReactNode } from 'react'
+import type { KeyboardEvent, ReactNode } from 'react'
 import type {
   FeatureValue,
   FeatureValuePagination,
 } from '@entities/document-feature'
 import { Button } from '@shared/ui'
+import { FeatureDeleteIcon } from './FeatureDeleteIcon'
 import { FeatureEditIcon } from './FeatureEditIcon'
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50]
@@ -18,25 +19,6 @@ function Weight({ value }: { value: number | null }) {
     <span className="inline-flex h-[26px] min-w-[30px] items-center justify-center rounded-compact border border-line bg-surface-subtle px-1 text-caption font-bold text-ink-secondary tabular-nums">
       {value ?? '—'}
     </span>
-  )
-}
-
-function DeleteIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M4.5 7h15M9 7V4.8h6V7m-8 0 .7 12h8.6L17 7M10 10.5v5M14 10.5v5"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.7"
-      />
-    </svg>
   )
 }
 
@@ -63,7 +45,10 @@ function ActionButton({
           ? 'border-line text-brand hover:border-brand hover:bg-brand-soft'
           : 'border-line text-danger hover:border-danger-line-strong hover:bg-danger-soft',
       ].join(' ')}
-      onClick={onClick}
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick()
+      }}
       title={label}
       type="button"
     >
@@ -99,7 +84,7 @@ function ValueActions({
         onClick={() => onDelete(value)}
         tone="delete"
       >
-        <DeleteIcon />
+        <FeatureDeleteIcon />
       </ActionButton>
     </span>
   )
@@ -116,8 +101,10 @@ export function FeatureValueTable({
   onAdd,
   onEdit,
   onDelete,
+  onSelect,
   onPageChange,
   onPageSizeChange,
+  selectedValueId,
 }: {
   values: FeatureValue[]
   pagination: FeatureValuePagination
@@ -129,8 +116,10 @@ export function FeatureValueTable({
   onAdd: () => void
   onEdit: (value: FeatureValue) => void
   onDelete: (value: FeatureValue) => void
+  onSelect: (valueId: number) => void
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
+  selectedValueId: number | null
 }) {
   const firstItem =
     pagination.totalItems === 0
@@ -237,39 +226,70 @@ export function FeatureValueTable({
               </tr>
             )}
             {!isLoading &&
-              values.map((value) => (
-                <tr
-                  className="h-16 border-b border-line-subtle text-xs"
-                  key={value.id}
-                >
-                  <td>
-                    <span className="block truncate font-bold text-ink">
-                      {value.feature}
-                    </span>
-                  </td>
-                  <td className="pr-3">
-                    <span className="line-clamp-2 text-caption leading-[1.45] text-ink-muted">
-                      {value.description || '—'}
-                    </span>
-                  </td>
-                  <td className="text-center">
-                    <Weight value={value.cWeight} />
-                  </td>
-                  <td className="text-center">
-                    <Weight value={value.sWeight} />
-                  </td>
-                  <td className="text-center">
-                    <Weight value={value.oWeight} />
-                  </td>
-                  <td className="pr-4 text-right">
-                    <ValueActions
-                      onDelete={onDelete}
-                      onEdit={onEdit}
-                      value={value}
-                    />
-                  </td>
-                </tr>
-              ))}
+              values.map((value) => {
+                const isSelected = selectedValueId === value.id
+                const handleKeyDown = (
+                  event: KeyboardEvent<HTMLTableRowElement>,
+                ) => {
+                  if (
+                    event.target !== event.currentTarget ||
+                    !['Enter', ' '].includes(event.key)
+                  ) {
+                    return
+                  }
+                  event.preventDefault()
+                  onSelect(value.id)
+                }
+
+                return (
+                  <tr
+                    aria-selected={isSelected}
+                    className={[
+                      'h-16 cursor-pointer border-b border-line-subtle text-xs transition-colors focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-brand',
+                      isSelected
+                        ? 'bg-brand-soft text-brand-strong'
+                        : 'hover:bg-surface-subtle',
+                    ].join(' ')}
+                    key={value.id}
+                    onClick={() => onSelect(value.id)}
+                    onKeyDown={handleKeyDown}
+                    tabIndex={0}
+                  >
+                    <td
+                      className={
+                        isSelected
+                        ? 'border-l-[3px] border-brand pl-3'
+                        : 'pl-[15px]'
+                      }
+                    >
+                      <span className="block truncate font-bold text-ink">
+                        {value.feature}
+                      </span>
+                    </td>
+                    <td className="pr-3">
+                      <span className="line-clamp-2 text-caption leading-[1.45] text-ink-muted">
+                        {value.description || '—'}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <Weight value={value.cWeight} />
+                    </td>
+                    <td className="text-center">
+                      <Weight value={value.sWeight} />
+                    </td>
+                    <td className="text-center">
+                      <Weight value={value.oWeight} />
+                    </td>
+                    <td className="pr-4 text-right">
+                      <ValueActions
+                        onDelete={onDelete}
+                        onEdit={onEdit}
+                        value={value}
+                      />
+                    </td>
+                  </tr>
+                )
+              })}
           </tbody>
         </table>
       </div>
@@ -286,48 +306,69 @@ export function FeatureValueTable({
           </p>
         )}
         {!isLoading &&
-          values.map((value) => (
-            <article
-              className="rounded-control border border-line bg-surface p-4"
-              key={value.id}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 pt-1">
-                  <h3 className="m-0 truncate text-label font-bold text-ink">
-                    {value.feature}
-                  </h3>
-                  <p className="mt-1 mb-0 line-clamp-2 text-caption leading-5 text-ink-muted">
-                    {value.description || '설명이 없습니다.'}
-                  </p>
-                </div>
-                <ValueActions
-                  isMobile
-                  onDelete={onDelete}
-                  onEdit={onEdit}
-                  value={value}
-                />
-              </div>
-              <dl className="mt-3 mb-0 flex items-center gap-3 border-t border-line-subtle pt-3">
-                {[
-                  ['C', value.cWeight],
-                  ['S', value.sWeight],
-                  ['O', value.oWeight],
-                ].map(([label, weight]) => (
-                  <div
-                    className="flex items-center gap-1.5"
-                    key={label}
-                  >
-                    <dt className="text-caption font-bold text-ink-muted">
-                      {label}
-                    </dt>
-                    <dd className="m-0">
-                      <Weight value={weight as number | null} />
-                    </dd>
+          values.map((value) => {
+            const isSelected = selectedValueId === value.id
+            return (
+              <article
+                aria-selected={isSelected}
+                className={[
+                  'cursor-pointer rounded-control border p-4 transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                  isSelected
+                    ? 'border-brand-line bg-brand-soft shadow-[inset_3px_0_0_var(--color-brand)]'
+                    : 'border-line bg-surface',
+                ].join(' ')}
+                key={value.id}
+                onClick={() => onSelect(value.id)}
+                onKeyDown={(event) => {
+                  if (
+                    event.target !== event.currentTarget ||
+                    !['Enter', ' '].includes(event.key)
+                  ) {
+                    return
+                  }
+                  event.preventDefault()
+                  onSelect(value.id)
+                }}
+                tabIndex={0}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 pt-1">
+                    <h3 className="m-0 truncate text-label font-bold text-ink">
+                      {value.feature}
+                    </h3>
+                    <p className="mt-1 mb-0 line-clamp-2 text-caption leading-5 text-ink-muted">
+                      {value.description || '설명이 없습니다.'}
+                    </p>
                   </div>
-                ))}
-              </dl>
-            </article>
-          ))}
+                  <ValueActions
+                    isMobile
+                    onDelete={onDelete}
+                    onEdit={onEdit}
+                    value={value}
+                  />
+                </div>
+                <dl className="mt-3 mb-0 flex items-center gap-3 border-t border-line-subtle pt-3">
+                  {[
+                    ['C', value.cWeight],
+                    ['S', value.sWeight],
+                    ['O', value.oWeight],
+                  ].map(([label, weight]) => (
+                    <div
+                      className="flex items-center gap-1.5"
+                      key={label}
+                    >
+                      <dt className="text-caption font-bold text-ink-muted">
+                        {label}
+                      </dt>
+                      <dd className="m-0">
+                        <Weight value={weight as number | null} />
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </article>
+            )
+          })}
       </div>
 
       <footer className="flex min-h-16 flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2 sm:px-6">

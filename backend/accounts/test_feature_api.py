@@ -4,7 +4,13 @@ from django.test import Client, TransactionTestCase
 from django.db import connection
 from django.urls import reverse
 
-from .models import FeatureGroup, FeatureType, FeatureValue, User
+from .models import (
+    FeatureGroup,
+    FeatureType,
+    FeatureValue,
+    ImageReference,
+    User,
+)
 
 
 class FeatureManagementApiTests(TransactionTestCase):
@@ -18,16 +24,19 @@ class FeatureManagementApiTests(TransactionTestCase):
             schema_editor.create_model(FeatureGroup)
             schema_editor.create_model(FeatureType)
             schema_editor.create_model(FeatureValue)
+            schema_editor.create_model(ImageReference)
 
     @classmethod
     def tearDownClass(cls):
         with connection.schema_editor() as schema_editor:
+            schema_editor.delete_model(ImageReference)
             schema_editor.delete_model(FeatureValue)
             schema_editor.delete_model(FeatureType)
             schema_editor.delete_model(FeatureGroup)
         super().tearDownClass()
 
     def setUp(self):
+        ImageReference.objects.all().delete()
         FeatureValue.objects.all().delete()
         FeatureType.objects.all().delete()
         FeatureGroup.objects.all().delete()
@@ -93,6 +102,8 @@ class FeatureManagementApiTests(TransactionTestCase):
             feature=overrides.get("feature", "Security Document"),
             description=overrides.get("description", "보안 문서"),
             note=overrides.get("note"),
+            physical_type=overrides.get("physical_type"),
+            semantic_role=overrides.get("semantic_role"),
         )
 
     def create_value(self, group, feature_type, **overrides):
@@ -284,6 +295,145 @@ class FeatureManagementApiTests(TransactionTestCase):
             group.pk,
         )
         self.assertIsNone(create_response.json()["item"]["note"])
+        self.assertIsNone(
+            create_response.json()["item"]["physicalType"]
+        )
+        self.assertIsNone(
+            create_response.json()["item"]["semanticRole"]
+        )
+
+    def test_document_image_type_accepts_image_metadata_fields(self):
+        group = FeatureGroup.objects.create(
+            feature_group_id=FeatureGroup.DOCUMENT_IMAGE_ID,
+            feature="Document Image",
+            description="문서 이미지 정보",
+        )
+        user = self.create_user()
+        client, csrf_token = self.login_client(user)
+
+        response = self.request_json(
+            client,
+            "post",
+            reverse("auth_api:feature-types"),
+            {
+                "groupId": group.pk,
+                "feature": "Logo",
+                "description": "기관 로고",
+                "physicalType": "Raster image",
+                "semanticRole": "Organization identity",
+            },
+            csrf_token=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.json()["item"]["physicalType"],
+            "Raster image",
+        )
+        self.assertEqual(
+            response.json()["item"]["semanticRole"],
+            "Organization identity",
+        )
+
+    def test_document_image_type_metadata_can_be_updated_and_cleared(self):
+        group = FeatureGroup.objects.create(
+            feature_group_id=FeatureGroup.DOCUMENT_IMAGE_ID,
+            feature="Document Image",
+            description="문서 이미지 정보",
+        )
+        feature_type = self.create_type(
+            group,
+            feature="Logo",
+            physical_type="Raster image",
+            semantic_role="Organization identity",
+        )
+        user = self.create_user()
+        client, csrf_token = self.login_client(user)
+        detail_url = reverse(
+            "auth_api:feature-type-detail",
+            args=[feature_type.pk],
+        )
+
+        update_response = self.request_json(
+            client,
+            "patch",
+            detail_url,
+            {
+                "physicalType": "Vector image",
+                "semanticRole": "Official emblem",
+            },
+            csrf_token=csrf_token,
+        )
+        clear_response = self.request_json(
+            client,
+            "patch",
+            detail_url,
+            {
+                "physicalType": "",
+                "semanticRole": None,
+            },
+            csrf_token=csrf_token,
+        )
+
+        self.assertEqual(update_response.status_code, 200)
+        self.assertEqual(
+            update_response.json()["item"]["physicalType"],
+            "Vector image",
+        )
+        self.assertEqual(
+            update_response.json()["item"]["semanticRole"],
+            "Official emblem",
+        )
+        self.assertEqual(clear_response.status_code, 200)
+        self.assertIsNone(
+            clear_response.json()["item"]["physicalType"]
+        )
+        self.assertIsNone(
+            clear_response.json()["item"]["semanticRole"]
+        )
+
+    def test_non_document_image_type_rejects_image_metadata_fields(self):
+        group = self.create_group()
+        user = self.create_user()
+        client, csrf_token = self.login_client(user)
+
+        response = self.request_json(
+            client,
+            "post",
+            reverse("auth_api:feature-types"),
+            {
+                "groupId": group.pk,
+                "feature": "Security Document",
+                "description": "보안 문서",
+                "physicalType": "Raster image",
+            },
+            csrf_token=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("physicalType", response.json()["errors"])
+
+    def test_non_document_image_type_update_rejects_image_metadata(self):
+        group = self.create_group()
+        feature_type = self.create_type(group)
+        user = self.create_user()
+        client, csrf_token = self.login_client(user)
+
+        response = self.request_json(
+            client,
+            "patch",
+            reverse(
+                "auth_api:feature-type-detail",
+                args=[feature_type.pk],
+            ),
+            {"semanticRole": "Organization identity"},
+            csrf_token=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("semanticRole", response.json()["errors"])
+        feature_type.refresh_from_db()
+        self.assertIsNone(feature_type.semantic_role)
 
     def test_value_creation_derives_group_and_type_name(self):
         group = self.create_group()

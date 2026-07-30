@@ -64,6 +64,8 @@ class User(models.Model):
 class FeatureGroup(models.Model):
     """기존 BDM_FEATURE_GROUP 대분류 테이블 매핑."""
 
+    DOCUMENT_IMAGE_ID = 3
+
     feature_group_id = models.AutoField(primary_key=True)
     feature = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
@@ -89,6 +91,16 @@ class FeatureType(models.Model):
     feature = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     note = models.CharField(max_length=100, blank=True, null=True)
+    physical_type = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    semantic_role = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         managed = False
@@ -130,3 +142,33 @@ class FeatureValue(models.Model):
         managed = False
         db_table = "BDM_FEATURE_VALUE"
         ordering = ("feature_value_id",)
+
+
+class ImageReference(models.Model):
+    """기존 BDM_IMAGE_REFERENCE 이미지 참조 테이블 매핑."""
+
+    USE_ACTIVE = "Y"
+    USE_INACTIVE = "N"
+
+    company_id = models.IntegerField()
+    user_id = models.IntegerField()
+    feature_value = models.ForeignKey(
+        FeatureValue,
+        db_column="feature_value_id",
+        db_constraint=False,
+        on_delete=models.DO_NOTHING,
+        related_name="image_references",
+    )
+    image_id = models.AutoField(primary_key=True)
+    image_origin_name = models.CharField(max_length=255)
+    image_name = models.CharField(max_length=255)
+    image_path = models.CharField(max_length=255)
+    use_yn = models.CharField(max_length=1, default=USE_ACTIVE)
+    regist_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+    description = models.CharField(max_length=255)
+
+    class Meta:
+        managed = False
+        db_table = "BDM_IMAGE_REFERENCE"
+        ordering = ("-regist_date", "-image_id")
