@@ -70,10 +70,41 @@ POST와 PATCH 요청은 `Content-Type: application/json`과 `X-CSRFToken` 헤더
 ### 문서 특징 관리 API
 
 `/api/settings/feature-groups/`, `/api/settings/feature-types/`,
-`/api/settings/feature-values/`에서 대·중·소분류를 관리합니다. 모든 조회와
-변경 요청은 로그인한 `SUPER_ADMIN`만 사용할 수 있고, 변경 요청에는 인증 API와
-같은 CSRF 헤더가 필요합니다. 소분류 목록은 기본 10개를 반환하고 `pageSize`
-쿼리로 페이지당 표시 수를 최대 50개까지 요청할 수 있습니다.
+`/api/settings/feature-values/`에서 대·중·소분류를 관리하고,
+`/api/settings/image-references/`에서 Document Image 소분류의 참조 이미지를
+관리합니다. 모든 조회와 변경 요청은 로그인한 `SUPER_ADMIN`만 사용할 수 있고,
+변경 요청에는 인증 API와 같은 CSRF 헤더가 필요합니다. 소분류 목록은 기본 10개를
+반환하고 `pageSize` 쿼리로 페이지당 표시 수를 최대 50개까지 요청할 수 있습니다.
+
+Document Image 중분류의 DB 열 `physical_type`, `semantic_role`은 선택 입력이며
+다른 대분류에는 저장할 수 없습니다. API에서는 각각 `physicalType`,
+`semanticRole`이라는 이름을 사용합니다. 이미지 등록은 소분류 생성과 분리합니다.
+소분류 생성 응답의 `item.id`를 받은 뒤 새 항목을 자동 선택하고, multipart 요청의
+`valueId`에 그 값을 넣어 이미지를 등록합니다.
+
+```text
+Document Image
+  └─ 중분류 Logo
+       └─ 소분류 국가안보기관로고 (feature_value_id)
+            └─ 참조 이미지 여러 건
+```
+
+참조 이미지는 다음 기준을 따릅니다.
+
+- `company_id`, `user_id`는 요청 본문이 아니라 로그인한 최초 등록자에서 가져옵니다.
+- JPEG, PNG, 정적 GIF, 정적 WebP만 허용하고 확장자와 실제 형식을 함께 검사합니다.
+- 파일명은 콘텐츠 SHA-256 해시로 만들고
+  `{company_id}/{feature_value_id}/{연도}/{월}/{해시}.{확장자}`에 저장합니다.
+- 저장 루트는 `BDM_IMAGE_ROOT` 환경변수로 지정하며 DB와 API에 절대 경로를
+  노출하지 않습니다.
+- 동일 소분류의 활성 이미지와 해시가 같으면 중복 등록을 거절합니다.
+- 삭제는 `use_yn=N`으로 비활성화하며 DB 행과 파일은 유지합니다.
+- 이미지 이력이 있는 소분류는 삭제할 수 없습니다.
+
+`BDM_FEATURE_*`와 `BDM_IMAGE_REFERENCE`는 기존 MariaDB 테이블에 대응하는
+`managed=False` 모델입니다. `accounts`의 관련 Django 마이그레이션은 ORM 상태와
+격리 테스트 구성을 맞추기 위한 것이며 운영 DB에 해당 열이나 테이블을 생성하지
+않습니다. 배포 전에 실제 MariaDB 스키마 적용 여부를 별도로 확인합니다.
 
 ## 사용자와 역할
 

@@ -8,7 +8,8 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
 
 - 최신 릴리스는 `v0.1.3`입니다.
 - `develop`에는 디자인 시스템 공통화, 설정 화면 반응형 개선, 분류 선택 UX 수정,
-  Playwright 인증 E2E 테스트가 후속 반영되어 있습니다.
+  Playwright 인증 E2E 테스트와 Document Image 참조 이미지 관리가 후속 반영되어
+  있습니다.
 - GitHub Actions CI는 아직 도입 전이므로 PR 전 검증 명령은 로컬에서 실행합니다.
 
 ## 구조
@@ -38,7 +39,8 @@ python manage.py runserver 127.0.0.1:8000
 
 MariaDB/RDS를 사용할 때는 `backend/.env.example`을 참고해 환경변수를 설정합니다.
 현재 Django 설정은 `.env`를 자동으로 읽지 않으므로 실행 전에 셸 또는 서비스 설정으로
-환경변수를 주입해야 합니다.
+환경변수를 주입해야 합니다. 참조 이미지를 사용할 때는 `BDM_IMAGE_ROOT`에 Git
+저장소 밖의 경로를 지정하고 Django 프로세스에 해당 디렉터리의 쓰기 권한을 줍니다.
 
 ### 인증 API
 
@@ -62,6 +64,18 @@ MariaDB/RDS를 사용할 때는 `backend/.env.example`을 참고해 환경변수
 - `/api/settings/feature-groups/`
 - `/api/settings/feature-types/`
 - `/api/settings/feature-values/`
+- `/api/settings/image-references/`
+
+Document Image 중분류에는 물리적 형태와 객체 역할을 선택적으로 기록할 수 있습니다.
+소분류를 만든 뒤 해당 항목을 선택해 JPEG, PNG, 정적 GIF, 정적 WebP 참조 이미지를
+등록합니다. 파일은 SHA-256 이름으로 저장하며 DB와 API에는 서버 저장 루트가 아닌
+상대 경로만 사용합니다.
+
+`BDM_FEATURE_*`와 `BDM_IMAGE_REFERENCE`는 기존 MariaDB 스키마를 사용하는
+`managed=False` 모델입니다. Django 마이그레이션은 모델 상태만 맞추며 운영 테이블을
+생성하거나 변경하지 않습니다. 배포 전 `BDM_FEATURE_TYPE`의 `physical_type`,
+`semantic_role` 열과 `BDM_IMAGE_REFERENCE` 테이블이 실제 DB에 있는지 확인해야
+합니다.
 
 ## Frontend
 
@@ -88,6 +102,8 @@ Playwright가 격리된 SQLite 테스트 DB를 초기화하고 Django와 Vite �
 각각 `127.0.0.1:8766`, `127.0.0.1:8765`에 실행하므로 MariaDB 데이터에는 영향을
 주지 않습니다. 비로그인 경로 보호, 로그인 성공·실패, 세션 유지와 로그아웃,
 회원가입 후 로그인, `SUPER_ADMIN` 메뉴 노출을 Chromium에서 검증합니다.
+Document Image E2E는 같은 격리 DB에서 실제 Django 이미지 업로드 API까지
+검증합니다.
 
 ## 배포 상태
 
