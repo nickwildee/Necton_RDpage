@@ -101,6 +101,13 @@ Document Image
 - 삭제는 `use_yn=N`으로 비활성화하며 DB 행과 파일은 유지합니다.
 - 이미지 이력이 있는 소분류는 삭제할 수 없습니다.
 
+프론트엔드는 이미지 메타데이터를 12개씩 추가 조회하되
+`@tanstack/react-virtual`로 현재 보이는 가로 카드 주변만 DOM에 렌더링합니다.
+가상화는 `ImageReferenceManagement`의 표시 계층에만 적용하며 기존 API 요청과
+`useImageReferences`의 페이지 상태에는 관여하지 않습니다. TanStack Query는 사용하지
+않습니다. 추후 Next.js로 이전할 때도 이 영역을 클라이언트 컴포넌트로 유지하면 같은
+React 가상화 훅을 재사용할 수 있습니다.
+
 `BDM_FEATURE_*`와 `BDM_IMAGE_REFERENCE`는 기존 MariaDB 테이블에 대응하는
 `managed=False` 모델입니다. `accounts`의 관련 Django 마이그레이션은 ORM 상태와
 격리 테스트 구성을 맞추기 위한 것이며 운영 DB에 해당 열이나 테이블을 생성하지
