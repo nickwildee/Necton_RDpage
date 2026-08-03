@@ -68,13 +68,18 @@ git merge origin/develop --no-edit
 conda env create -f backend/environment.yml
 conda activate necton_auth
 cd backend
-python manage.py check
-python manage.py test
-python manage.py runserver 127.0.0.1:8000
+DB_ENGINE=sqlite python manage.py migrate
+DB_ENGINE=sqlite python manage.py check
+DB_ENGINE=sqlite python manage.py test
+DB_ENGINE=sqlite python manage.py runserver 127.0.0.1:8000
 ```
 
 환경변수는 `backend/.env.example`을 기준으로 셸이나 서비스 설정에서 주입합니다.
 Django는 `.env` 파일을 자동으로 읽지 않으며 실제 비밀값을 커밋하면 안 됩니다.
+위 `migrate` 명령은 새 로컬 SQLite용입니다. 기존 MariaDB에서는 `USER` 테이블과
+migration 기록을 먼저 대조하지 않은 채 실행하지 않습니다. 일반 SQLite에는
+`managed=False`인 BDM 특징 테이블이 생기지 않으므로 설정 화면은 MariaDB 또는
+Playwright E2E 환경에서 확인합니다.
 
 ### Frontend
 
@@ -117,7 +122,7 @@ Vite는 상대 `/api/` 요청을 `127.0.0.1:8000`의 Django로 프록시합니�
 
 | 변경 범위 | 필수 검증 |
 | --- | --- |
-| Backend | `python manage.py check`, `python manage.py test` |
+| Backend | `DB_ENGINE=sqlite python manage.py check`, `DB_ENGINE=sqlite python manage.py test` |
 | Frontend | `npm run lint`, `npm run build` |
 | 인증 API 또는 화면 | 위 검증 전체와 `npm run test:e2e` |
 | 역할별 UI | `SUPER_ADMIN`과 일반 `USER`를 각각 확인 |
