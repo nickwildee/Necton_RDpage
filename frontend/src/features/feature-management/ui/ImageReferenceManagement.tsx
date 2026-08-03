@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { UIEvent } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import type {
   FeatureValue,
   ImageReference,
@@ -13,6 +14,9 @@ import { ImageReferenceDialog } from './ImageReferenceDialog'
 const SCROLL_EDGE_EPSILON_PX = 4
 const LOAD_MORE_THRESHOLD_PX = 180
 const SCROLL_PAGE_RATIO = 0.8
+const IMAGE_CARD_ESTIMATED_WIDTH_PX = 256
+const IMAGE_CARD_GAP_PX = 12
+const IMAGE_CARD_OVERSCAN = 3
 
 function formatDate(value: string) {
   const date = new Date(value)
@@ -144,6 +148,26 @@ export function ImageReferenceManagement({
     deactivateEditorItem,
     deactivateItem,
   } = management
+  const getVirtualItemKey = useCallback(
+    (index: number) =>
+      index < images.length ? images[index].id : 'loading-more',
+    [images],
+  )
+  const virtualItemCount =
+    images.length + (isLoadingMore ? 1 : 0)
+  const imageVirtualizer = useVirtualizer({
+    count: virtualItemCount,
+    estimateSize: () => IMAGE_CARD_ESTIMATED_WIDTH_PX,
+    gap: IMAGE_CARD_GAP_PX,
+    getItemKey: getVirtualItemKey,
+    getScrollElement: () => carouselRef.current,
+    horizontal: true,
+    overscan: IMAGE_CARD_OVERSCAN,
+    useFlushSync: false,
+  })
+  const virtualItems = imageVirtualizer.getVirtualItems()
+  const firstVirtualItem = virtualItems[0]
+  const lastVirtualItem = virtualItems.at(-1)
 
   useEffect(() => {
     setIsExpanded(selectedValueId !== null)
@@ -315,30 +339,67 @@ export function ImageReferenceManagement({
                   />
                   <div
                     aria-label={`${selectedValue.feature} 등록 이미지`}
-                    className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    className="min-w-0 snap-x snap-mandatory overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     onScroll={handleScroll}
                     ref={carouselRef}
                     tabIndex={0}
                   >
-                    {images.map((image) => (
+                    <div
+                      className="relative"
+                      style={{
+                        width: `${imageVirtualizer.getTotalSize()}px`,
+                      }}
+                    >
                       <div
-                        className="w-60 shrink-0 snap-start sm:w-64"
-                        key={image.id}
+                        className="flex gap-3"
+                        style={{
+                          paddingLeft: `${firstVirtualItem?.start ?? 0}px`,
+                          paddingRight: `${
+                            lastVirtualItem
+                              ? Math.max(
+                                  0,
+                                  imageVirtualizer.getTotalSize() -
+                                    lastVirtualItem.end,
+                                )
+                              : 0
+                          }px`,
+                          width: `${imageVirtualizer.getTotalSize()}px`,
+                        }}
                       >
-                        <ImageCard
-                          image={image}
-                          onDeactivate={(item) =>
-                            void deactivateItem(item)
+                        {virtualItems.map((virtualItem) => {
+                          const image = images[virtualItem.index]
+                          if (!image) {
+                            return (
+                              <div
+                                className="grid min-w-[180px] place-items-center text-caption text-ink-muted"
+                                data-index={virtualItem.index}
+                                key={virtualItem.key}
+                                ref={imageVirtualizer.measureElement}
+                              >
+                                더 불러오는 중
+                              </div>
+                            )
                           }
-                          onEdit={openEdit}
-                        />
+                          return (
+                            <div
+                              className="w-60 shrink-0 snap-start sm:w-64"
+                              data-image-reference-card={image.id}
+                              data-index={virtualItem.index}
+                              key={virtualItem.key}
+                              ref={imageVirtualizer.measureElement}
+                            >
+                              <ImageCard
+                                image={image}
+                                onDeactivate={(item) =>
+                                  void deactivateItem(item)
+                                }
+                                onEdit={openEdit}
+                              />
+                            </div>
+                          )
+                        })}
                       </div>
-                    ))}
-                    {isLoadingMore && (
-                      <div className="grid min-w-[180px] place-items-center text-caption text-ink-muted">
-                        더 불러오는 중
-                      </div>
-                    )}
+                    </div>
                   </div>
                   <ArrowButton
                     direction="right"
