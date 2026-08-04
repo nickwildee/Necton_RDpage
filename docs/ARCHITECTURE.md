@@ -18,7 +18,7 @@ Browser
                                       Django authentication API
                                                 │
                                                 v
-                                      MariaDB USER table
+                                      MariaDB USER/documents tables
 ```
 
 개발 환경에서는 Django가 `127.0.0.1:8000`에서 실행되고 Vite가 `/api` 요청을
@@ -113,6 +113,32 @@ React 가상화 훅을 재사용할 수 있습니다.
 격리 테스트 구성을 맞추기 위한 것이며 운영 DB에 해당 열이나 테이블을 생성하지
 않습니다. 배포 전에 실제 MariaDB 스키마 적용 여부를 별도로 확인합니다.
 
+### 연구 데이터 조회 API
+
+`/api/research/documents/`는 RD-2 수집기의 기존 `documents` 테이블을 읽습니다.
+모든 로그인 역할이 조회할 수 있으며 O/S/C는 한 화면에 동시에 표시하되 API 요청과
+페이지 상태는 유형별로 독립적입니다.
+
+| Method | Path | 책임 |
+| --- | --- | --- |
+| `GET` | `/api/research/documents/summary/` | O/S/C와 전체 건수 집계 |
+| `GET` | `/api/research/documents/?category=O&page=1` | 유형별 30건 목록 |
+| `GET` | `/api/research/documents/{id}/files/body/` | 본문 자료 스트리밍 |
+| `GET` | `/api/research/documents/{id}/files/other/{index}/` | 기타 자료 스트리밍 |
+
+`Document`는 `managed=False`이며 운영 스키마를 변경하지 않습니다. 실제 컬럼은
+`id`, `cso_classification`, `title`, `ordering_agency`, `department`,
+`production_date`, `body_file_path`, `other_file_paths`를 사용합니다. 목록은
+`production_date DESC, id DESC`로 정렬하고 서버에서 30건씩 페이지를 나눕니다.
+
+파일 경로는 RD-2 수집기가 `RESEARCH_DOCUMENT_ROOT` 기준 상대경로로 저장하며,
+운영 EC2에서는 `/home/ubuntu/data/raw`를 루트로 사용합니다. DB에 경로만 남고 실제
+파일이 없는 레거시 문서는 파일 API에서 404로 처리합니다.
+목록 API는 원본 경로를 반환하지 않고 파일명과 문서 ID 기반 URL만 제공합니다.
+파일 API는 인증 후 DB에서 경로를 다시 읽고, 경로 이동과 심볼릭 링크로 설정 루트
+밖에 접근하는 요청을 차단합니다. `other_file_paths`는 `|` 구분 복수 경로이므로
+인덱스별 URL을 만듭니다.
+
 ## 사용자와 역할
 
 Django `User` 모델은 MariaDB `USER` 테이블에 매핑됩니다. 기존 환경에서는 같은
@@ -199,6 +225,10 @@ custom hook에는 상태와 이벤트 동작, API segment에는 HTTP 요청을 �
 
 `Navigation`도 메뉴 렌더링은 `ui/`, 사용자 표시·역할 판정·로그아웃은
 `model/useNavigation`에서 담당합니다.
+
+연구 데이터는 `features/research-documents`에서 API 타입과 유형별 독립 상태,
+목록·아코디언 UI를 관리하고 `pages/research`는 `PageHeader`와 기능을 조립합니다.
+세 열은 각각 요청 취소, 로딩, 오류, 펼침 문서와 현재 페이지를 따로 관리합니다.
 
 ## Django 템플릿과 React 전환
 

@@ -2,7 +2,7 @@
 
 Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해당하는지 분류하는
 모델을 제공하는 서비스입니다. 이 저장소는 모델을 이용하기 위한 사용자 인증,
-문서 특징 관리, React 웹 화면과 Django API를 관리합니다.
+연구데이터 조회, 문서 특징 관리, React 웹 화면과 Django API를 관리합니다.
 
 ## 현재 기준
 
@@ -37,21 +37,22 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
 | 인증 | Django 세션 쿠키와 CSRF 기반 회원가입·로그인·로그아웃·현재 사용자 조회 |
 | 마이페이지 | 이메일·역할 표시, 닉네임 변경, 현재 비밀번호 확인 후 비밀번호 변경 |
 | 역할 | `SUPER_ADMIN`만 설정 메뉴와 문서 특징 관리 API 사용 가능 |
+| 연구 데이터 | 로그인 사용자의 O/S/C 문서 메타데이터 조회, 유형별 30건 페이지네이션과 자료 파일 열기 |
 | 문서 특징 | 대·중·소분류 조회·추가·수정·삭제와 소분류 페이지네이션 |
 | Document Image | 중분류 메타데이터와 소분류별 참조 이미지 등록·조회·설명 수정·비활성화 |
 | 프론트엔드 | React Router, FSD 계층, Tailwind 디자인 토큰, 데스크톱·태블릿·모바일 화면 |
 | 자동 검증 | Django 테스트, 프론트 lint/build, Chromium Playwright E2E |
 
-`연구 데이터`, `분석 리포트` 네비게이션은 현재 화면이 없는 자리표시자입니다. 모델
-추론과 문서 분석 파이프라인도 이 저장소의 현재 구현 범위에는 포함되지 않습니다.
+`분석 리포트` 네비게이션은 현재 화면이 없는 자리표시자입니다. 모델 추론과 문서
+분석 파이프라인도 이 저장소의 현재 구현 범위에는 포함되지 않습니다.
 
 ### 인수인계 시 반드시 알아둘 경계
 
 - Django는 `.env`를 자동으로 읽지 않습니다. MariaDB를 사용할 때는 실행 프로세스에
   환경변수가 실제로 전달됐는지 확인합니다.
-- 기존 MariaDB의 `USER`, `BDM_FEATURE_*`, `BDM_IMAGE_REFERENCE`가 데이터 원본입니다.
-  BDM 모델은 `managed=False`이므로 Django 마이그레이션이 테이블을 만들거나 고치지
-  않습니다.
+- 기존 MariaDB의 `USER`, `documents`, `BDM_FEATURE_*`, `BDM_IMAGE_REFERENCE`가
+  데이터 원본입니다. `documents`와 BDM 모델은 `managed=False`이므로 Django
+  마이그레이션이 운영 테이블을 만들거나 고치지 않습니다.
 - 기존 MariaDB에서 `python manage.py migrate`를 바로 실행하지 않습니다. 먼저 백업과
   `python manage.py showmigrations accounts` 결과를 확인하고, 실제 테이블과 migration
   기록을 대조한 뒤 적용 여부를 결정합니다.
@@ -62,6 +63,9 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
   도메인 코드로 바꿀지 결정해야 합니다.
 - 이미지 파일은 `BDM_IMAGE_ROOT` 아래의 EC2 로컬 디스크에 저장됩니다. 저장 용량,
   백업, 보존 기간과 장애 복구 정책은 아직 정해지지 않았습니다.
+- 연구자료 파일은 `RESEARCH_DOCUMENT_ROOT` 아래에서만 조회합니다. `documents`의
+  `body_file_path`, `other_file_paths`에는 이 루트를 기준으로 한 상대경로가 있어야
+  하며 Django 프로세스에 읽기 권한이 필요합니다.
 - 인증 세션은 서버 테이블이 아닌 서명 쿠키에 저장됩니다. 데모에는 별도 세션 테이블이
   필요 없지만, 복사된 쿠키를 로그아웃만으로 서버에서 강제 폐기할 수 없으므로 운영 전에는
   DB/cache 세션 또는 별도 폐기 전략을 결정해야 합니다.
@@ -102,9 +106,10 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
 | 백엔드 런타임 | Conda, Python 3.12 | 환경 이름은 `necton_auth`이며 `backend/environment.yml`로 생성합니다. |
 | 백엔드 패키지 | Django 6.0.7, Pillow 12.3.0, mysqlclient 2.2.8 | 버전은 `backend/environment.yml`에 고정되어 있습니다. |
 | 프론트엔드 런타임 | Node.js 24, npm | 패키지는 `frontend/package-lock.json` 기준으로 `npm ci`로 설치합니다. |
-| 데이터베이스 | MariaDB 또는 MySQL 호환 RDS | EC2에서 DB 호스트와 포트에 접근할 수 있어야 하며 기존 `USER`, `BDM_FEATURE_*`, `BDM_IMAGE_REFERENCE` 스키마가 필요합니다. |
+| 데이터베이스 | MariaDB 또는 MySQL 호환 RDS | EC2에서 DB 호스트와 포트에 접근할 수 있어야 하며 기존 `USER`, `documents`, `BDM_FEATURE_*`, `BDM_IMAGE_REFERENCE` 스키마가 필요합니다. |
 | 네트워크 | 외부 `7746`, 내부 `8000`, EC2에서 DB 포트 연결 | `8000`은 외부에 공개하지 않고 Vite가 `/api/` 요청을 프록시합니다. |
 | 이미지 저장소 | Git 저장소 밖의 쓰기 가능한 디렉터리 | `BDM_IMAGE_ROOT`로 지정하며 현재 예시는 `/home/ubuntu/data/necton/images`입니다. |
+| 연구자료 저장소 | RD-2 파일이 있는 읽기 가능한 디렉터리 | `RESEARCH_DOCUMENT_ROOT`로 지정하며 DB에는 이 루트 기준 상대경로만 저장합니다. |
 | E2E 테스트 | Playwright Chromium | 서비스 실행에는 필요하지 않고 `npm run test:e2e`를 실행할 때만 필요합니다. |
 
 Ubuntu에서 `mysqlclient` 설치에 필요한 기본 도구가 없다면 최초 한 번 설치합니다.
@@ -142,6 +147,8 @@ MariaDB/RDS를 사용할 때는 `backend/.env.example`을 참고해 환경변수
 현재 Django 설정은 `.env`를 자동으로 읽지 않으므로 실행 전에 셸 또는 서비스 설정으로
 환경변수를 주입해야 합니다. 참조 이미지를 사용할 때는 `BDM_IMAGE_ROOT`에 Git
 저장소 밖의 경로를 지정하고 Django 프로세스에 해당 디렉터리의 쓰기 권한을 줍니다.
+연구자료 링크를 사용할 때는 `RESEARCH_DOCUMENT_ROOT`에 EC2의 RD-2 원본 자료
+디렉터리인 `/home/ubuntu/data/raw`를 지정하고 Django 프로세스에 읽기 권한을 줍니다.
 
 ### 인증 API
 
@@ -156,6 +163,21 @@ MariaDB/RDS를 사용할 때는 `backend/.env.example`을 참고해 환경변수
 변경 요청은 JSON 본문과 `X-CSRFToken` 헤더를 사용합니다. 프런트엔드는 먼저 CSRF
 엔드포인트를 호출한 뒤 같은 도메인의 Django 세션 쿠키를 함께 전송합니다. JWT나
 브라우저 `localStorage` 인증 토큰은 사용하지 않습니다.
+
+### 연구 데이터 API
+
+로그인한 사용자는 다음 API에서 `documents.cso_classification`의 O/S/C 문서를
+조회할 수 있습니다.
+
+- `GET /api/research/documents/summary/`: O/S/C와 전체 건수
+- `GET /api/research/documents/?category=O&page=1`: 유형별 30건 목록
+- `GET /api/research/documents/{id}/files/body/`: 본문 자료
+- `GET /api/research/documents/{id}/files/other/{index}/`: 기타 자료
+
+목록은 `production_date DESC, id DESC`로 고정 정렬합니다. API에는 실제 파일 경로를
+포함하지 않고 파일명과 문서 ID 기반 URL만 반환합니다. 기타 자료는 DB의
+`other_file_paths` 값을 `|`로 나눠 각각의 링크로 제공합니다. 파일 요청은 설정된
+루트 밖으로 벗어나는 상대경로와 심볼릭 링크를 거부합니다.
 
 ### 문서 특징 관리 API
 
@@ -194,9 +216,11 @@ npm run test:e2e
 개발 서버는 상대 경로 `/api/` 요청을 `http://127.0.0.1:8000`의 Django로
 프록시합니다.
 
-현재 React 화면은 로그인, 회원가입, 인트로, 마이페이지와 `SUPER_ADMIN` 전용
-문서 특징 관리 페이지로 구성됩니다. 공통 색상·타이포그래피·간격은 Tailwind의
-시맨틱 토큰으로 관리하고, 화면과 상태 로직은 FSD 계층 안에서 분리합니다.
+현재 React 화면은 로그인, 회원가입, 인트로, 마이페이지, 연구 데이터와
+`SUPER_ADMIN` 전용 문서 특징 관리 페이지로 구성됩니다. 연구 데이터 화면은
+O/S/C 목록을 동시에 표시하고 각 열이 독립적인 스크롤·아코디언·페이지 상태를
+가집니다. 공통 색상·타이포그래피·간격은 Tailwind의 시맨틱 토큰으로 관리하고,
+화면과 상태 로직은 FSD 계층 안에서 분리합니다.
 
 E2E 테스트는 `necton_auth` Conda 환경을 활성화한 상태에서 실행합니다.
 Playwright가 격리된 SQLite 테스트 DB를 초기화하고 Django와 Vite 테스트 서버를
@@ -204,7 +228,8 @@ Playwright가 격리된 SQLite 테스트 DB를 초기화하고 Django와 Vite �
 주지 않습니다. 비로그인 경로 보호, 로그인 성공·실패, 세션 유지와 로그아웃,
 회원가입 후 로그인, `SUPER_ADMIN` 메뉴 노출을 Chromium에서 검증합니다.
 Document Image E2E는 같은 격리 DB에서 실제 Django 이미지 업로드 API까지
-검증합니다.
+검증합니다. 연구 데이터 E2E는 유형별 32건과 전용 테스트 파일을 만들어 30건
+페이지 경계, 독립 페이지 이동, 동시 아코디언과 파일 API를 검증합니다.
 
 ## 검증 기준
 
@@ -291,6 +316,7 @@ DB_USER=DATABASE_USER
 DB_PASSWORD=DATABASE_PASSWORD
 
 BDM_IMAGE_ROOT=/home/ubuntu/data/necton/images
+RESEARCH_DOCUMENT_ROOT=/home/ubuntu/data/raw
 ```
 
 이미지 저장 디렉터리는 Git 저장소 밖에 만들고 백엔드 실행 사용자에게 쓰기 권한을
@@ -298,6 +324,15 @@ BDM_IMAGE_ROOT=/home/ubuntu/data/necton/images
 
 ```bash
 mkdir -p /home/ubuntu/data/necton/images
+```
+
+연구자료 저장소는 운영 EC2의 RD-2 원본 자료 디렉터리인 `/home/ubuntu/data/raw`를
+그대로 사용합니다. `documents.body_file_path`와 `other_file_paths`에는 이 루트 기준
+상대경로가 저장됩니다. DB에 경로가 있어도 원본 파일이 없는 레거시 문서는 파일 API가
+404를 반환합니다. 파일을 복사하거나 Git 저장소 안으로 옮기지 않습니다.
+
+```bash
+test -r /home/ubuntu/data/raw
 ```
 
 Django 자체는 `.env` 파일을 자동으로 읽지 않습니다. `scripts/startup.sh`는 이 파일을
