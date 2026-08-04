@@ -208,3 +208,7 @@ STATIC_URL = 'static/'
 # 실제 경로는 서버 환경에서만 주입한다. DB와 API에는 이 경로 아래의 상대 경로만
 # 저장하거나 반환하며, 설정되지 않은 환경에서는 이미지 업로드와 조회만 거부한다.
 BDM_IMAGE_ROOT = os.environ.get("BDM_IMAGE_ROOT")
+
+# RD-2 수집기가 documents.body_file_path와 other_file_paths에 저장한 상대경로의
+# 기준 디렉터리. 실제 파일 경로는 API 응답에 노출하지 않는다.
+RESEARCH_DOCUMENT_ROOT = os.environ.get("RESEARCH_DOCUMENT_ROOT")

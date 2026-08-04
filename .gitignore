@@ -9,6 +9,7 @@ __pycache__/
 .coverage
 htmlcov/
 backend/.e2e-images/
+backend/.e2e-documents/
 node_modules/
 dist/
 .vite/

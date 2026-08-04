@@ -4,6 +4,7 @@ from . import (
     api_views,
     feature_api_views,
     image_reference_api_views,
+    research_api_views,
 )
 
 app_name = "auth_api"
@@ -60,5 +61,25 @@ urlpatterns = [
         "settings/image-references/<int:image_id>/file/",
         image_reference_api_views.image_reference_file,
         name="image-reference-file",
+    ),
+    path(
+        "research/documents/summary/",
+        research_api_views.document_summary,
+        name="research-document-summary",
+    ),
+    path(
+        "research/documents/",
+        research_api_views.documents,
+        name="research-documents",
+    ),
+    path(
+        "research/documents/<int:document_id>/files/body/",
+        research_api_views.document_body_file,
+        name="research-document-body-file",
+    ),
+    path(
+        "research/documents/<int:document_id>/files/other/<int:file_index>/",
+        research_api_views.document_other_file,
+        name="research-document-other-file",
     ),
 ]

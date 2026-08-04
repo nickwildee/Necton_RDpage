@@ -1,4 +1,5 @@
 import os
+from datetime import date, timedelta
 from pathlib import Path
 
 from django.conf import settings
@@ -7,6 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 
 from accounts.models import (
+    Document,
     FeatureGroup,
     FeatureType,
     FeatureValue,
@@ -55,6 +57,7 @@ def recreate_feature_tables():
         FeatureType,
         FeatureValue,
         ImageReference,
+        Document,
     )
     existing_tables = set(connection.introspection.table_names())
 
@@ -104,6 +107,63 @@ def create_e2e_features():
     )
 
 
+def create_e2e_documents():
+    document_root = Path(settings.RESEARCH_DOCUMENT_ROOT)
+    file_directory = document_root / "e2e" / "research"
+    file_directory.mkdir(parents=True, exist_ok=True)
+
+    category_metadata = {
+        "O": ("공개", "해양수산부", "해양정책과"),
+        "S": ("민감", "과학기술정보통신부", "연구시설정책과"),
+        "C": ("기밀", "국가안보실", "보안연구과"),
+    }
+    base_date = date(2025, 12, 31)
+
+    for category, (label, agency, department) in category_metadata.items():
+        for index in range(32):
+            body_path = None
+            other_paths = None
+            if index == 0:
+                body_relative = Path(
+                    "e2e",
+                    "research",
+                    f"{category}_연구개발_시행계획.pdf",
+                )
+                budget_relative = Path(
+                    "e2e",
+                    "research",
+                    f"{category}_사업별_예산현황.xlsx",
+                )
+                reference_relative = Path(
+                    "e2e",
+                    "research",
+                    f"{category}_참고자료.hwp",
+                )
+                for relative_path, content in (
+                    (body_relative, b"e2e-pdf"),
+                    (budget_relative, b"e2e-xlsx"),
+                    (reference_relative, b"e2e-hwp"),
+                ):
+                    (document_root / relative_path).write_bytes(content)
+                body_path = body_relative.as_posix()
+                other_paths = "|".join(
+                    (
+                        budget_relative.as_posix(),
+                        reference_relative.as_posix(),
+                    )
+                )
+
+            Document.objects.create(
+                cso_classification=category,
+                title=f"{label} 연구 문서 {index + 1:02d}",
+                ordering_agency=agency,
+                department=department,
+                production_date=base_date - timedelta(days=index),
+                body_file_path=body_path,
+                other_file_paths=other_paths,
+            )
+
+
 class Command(BaseCommand):
     help = "Prepare the isolated E2E database and run the Django test server."
 
@@ -124,6 +184,7 @@ class Command(BaseCommand):
             role=User.ROLE_SUPER_ADMIN,
         )
         create_e2e_features()
+        create_e2e_documents()
 
         call_command(
             "runserver",

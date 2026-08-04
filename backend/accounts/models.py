@@ -172,3 +172,38 @@ class ImageReference(models.Model):
         managed = False
         db_table = "BDM_IMAGE_REFERENCE"
         ordering = ("-regist_date", "-image_id")
+
+
+class Document(models.Model):
+    """RD-2 수집기의 기존 documents 테이블 매핑."""
+
+    CLASSIFICATION_OPEN = "O"
+    CLASSIFICATION_SENSITIVE = "S"
+    CLASSIFICATION_CONFIDENTIAL = "C"
+    CLASSIFICATIONS = (
+        CLASSIFICATION_OPEN,
+        CLASSIFICATION_SENSITIVE,
+        CLASSIFICATION_CONFIDENTIAL,
+    )
+
+    id = models.AutoField(primary_key=True)
+    cso_classification = models.CharField(max_length=16)
+    title = models.CharField(max_length=255, blank=True, null=True)
+    ordering_agency = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    department = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    production_date = models.DateField(blank=True, null=True)
+    body_file_path = models.TextField(blank=True, null=True)
+    other_file_paths = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "documents"
+        ordering = ("-production_date", "-id")
