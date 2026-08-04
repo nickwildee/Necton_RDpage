@@ -27,8 +27,8 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
 5. 백엔드를 먼저 `127.0.0.1:8000`에 실행한 뒤 프론트엔드를 실행합니다. 브라우저의
    `/api/` 요청은 Vite가 Django로 프록시합니다.
 6. 변경 후에는 아래 [검증 기준](#검증-기준)을 실제로 실행한 결과만 PR에 기록합니다.
-7. EC2 데모를 갱신할 때는 [EC2 데모 실행](#ec2-데모-실행)을 따릅니다. `git pull`만으로
-   `nohup` 프로세스가 재시작되지는 않습니다.
+7. EC2 데모를 갱신할 때는 [EC2 데모 실행](#ec2-데모-실행)을 따릅니다. `git pull` 뒤에는
+   `./scripts/shutdown.sh`, `./scripts/startup.sh`로 서비스를 직접 재시작합니다.
 
 ### 현재 구현 범위
 
@@ -65,8 +65,9 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
 - 인증 세션은 서버 테이블이 아닌 서명 쿠키에 저장됩니다. 데모에는 별도 세션 테이블이
   필요 없지만, 복사된 쿠키를 로그아웃만으로 서버에서 강제 폐기할 수 없으므로 운영 전에는
   DB/cache 세션 또는 별도 폐기 전략을 결정해야 합니다.
-- 현재 배포는 Django와 Vite 개발 서버를 `nohup`으로 실행하는 데모입니다. 재부팅 후
-  자동 시작, HTTPS, 운영 WSGI 서버와 중앙 로그 수집은 제공하지 않습니다.
+- 현재 배포는 Django와 Vite 개발 서버를 `nohup`과 `setsid`로 실행하는 데모입니다.
+  실행·종료 스크립트는 제공하지만 재부팅 후 자동 시작, HTTPS, 운영 WSGI 서버와 중앙
+  로그 수집은 제공하지 않습니다.
 - 주요 미해결 정책은 [v0.1.3 미해결 안건](https://github.com/nickwildee/Necton_RDpage/discussions/21),
   코드 개선 후보는 [코드 품질 감사](https://github.com/nickwildee/Necton_RDpage/discussions/36),
   CI 기준은 [Playwright E2E 및 CI](https://github.com/nickwildee/Necton_RDpage/discussions/26),
@@ -77,6 +78,7 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
 
 - `backend/`: Django 인증 서버. React 전환이 끝날 때까지 기존 템플릿도 유지합니다.
 - `frontend/`: React, Vite, TypeScript, Tailwind CSS 기반 웹 화면입니다.
+- `scripts/`: EC2 데모 백엔드·프론트엔드 실행과 종료 스크립트입니다.
 
 두 프로젝트의 의존성, 환경변수, 실행 명령은 서로 섞지 않습니다.
 
@@ -298,8 +300,11 @@ BDM_IMAGE_ROOT=/home/ubuntu/data/necton/images
 mkdir -p /home/ubuntu/data/necton/images
 ```
 
-Django는 `.env` 파일을 자동으로 읽지 않습니다. 백엔드를 실행하는 터미널에서 아래
-순서로 값을 환경변수로 내보내야 합니다.
+Django 자체는 `.env` 파일을 자동으로 읽지 않습니다. `scripts/startup.sh`는 이 파일을
+백엔드 프로세스에만 자동으로 불러옵니다. `.env`는 Bash 문법으로 읽으므로 `KEY=value`
+형식만 사용하고, 공백이나 `$` 같은 특수문자가 포함된 값은 작은따옴표로 감쌉니다.
+Django 관리 명령이나 수동 실행 명령을 사용할 때는 아래 순서로 값을 환경변수로
+내보냅니다.
 
 ```bash
 cd ~/workspace/Necton_RDpage/backend
@@ -339,28 +344,72 @@ print('BDM rows:', {
 없거나 테이블 구조와 맞지 않으면 후임자가 단독으로 처리하지 말고 DB 백업과 스키마
 대조를 먼저 안건으로 남깁니다.
 
-### 3. 백엔드 실행
+### 3. 백엔드와 프론트엔드 일괄 실행
 
-환경변수를 불러온 같은 터미널에서 실행합니다.
+저장소 루트에서 `necton_auth` Conda 환경을 활성화한 뒤 실행 스크립트를 사용합니다.
+스크립트는 `.env` 로드, 중복 실행 검사, 로그·PID 디렉터리 생성, 두 서버 실행과 HTTP
+응답 확인을 순서대로 처리합니다.
 
 ```bash
-cd ~/workspace/Necton_RDpage/backend
-
-nohup python manage.py runserver 127.0.0.1:8000 --noreload \
-  > /tmp/necton-backend.log 2>&1 &
+cd ~/workspace/Necton_RDpage
+conda activate necton_auth
+./scripts/startup.sh
 ```
 
-### 4. 프론트엔드 실행
+실행 로그와 PID는 다음 위치에 저장됩니다.
+
+```text
+backend/logs/backend.log
+frontend/logs/frontend.log
+.runtime/backend.pid
+.runtime/frontend.pid
+```
+
+로그와 PID 파일은 Git에서 제외되며, 로그는 재시작해도 같은 파일에 이어서 기록됩니다.
+현재 스크립트에는 로그 회전 기능이 없으므로 장기간 실행할 때는 파일 크기를 확인합니다.
+
+### 4. 수동 실행
+
+스크립트 문제를 진단할 때만 아래 명령을 사용합니다. 저장소 루트에서 디렉터리를 만들고,
+백엔드 전용 서브셸에서만 `.env`를 불러온 뒤 두 프로세스를 별도 세션으로 실행합니다.
+
+```bash
+cd ~/workspace/Necton_RDpage
+conda activate necton_auth
+mkdir -p backend/logs frontend/logs .runtime
+
+(
+  cd backend
+  set -a
+  source .env
+  set +a
+
+  nohup setsid python manage.py runserver 127.0.0.1:8000 --noreload \
+    >> "$PWD/logs/backend.log" 2>&1 < /dev/null &
+  echo $! > ../.runtime/backend.pid
+)
+```
 
 ```bash
 cd ~/workspace/Necton_RDpage/frontend
 
-nohup npm run dev -- \
+nohup setsid npm run dev -- \
   --host 0.0.0.0 \
   --port 7746 \
   --strictPort \
-  > /tmp/necton-vite.log 2>&1 &
+  >> "$PWD/logs/frontend.log" 2>&1 < /dev/null &
+echo $! > ../.runtime/frontend.pid
 ```
+
+Vite는 `npm -> sh -> vite(Node.js)` 순서로 자식 프로세스를 생성합니다. 이 EC2의
+대화형 SSH 환경에서는 `nohup`만 사용하면 실제 Vite 프로세스가 SSH 세션에 남아,
+터미널을 닫을 때 함께 종료될 수 있습니다. `setsid`는 전체 실행 체인을 새 세션으로
+분리하고, `< /dev/null`은 표준 입력이 SSH 터미널을 참조하지 않도록 합니다.
+
+위 명령은 SSH 연결을 종료한 뒤 다시 접속해 `7746` 포트와 HTTP `200 OK`가 유지되는
+것까지 확인한 방식입니다. 다만 `nohup`과 `setsid`는 프로세스 장애나 EC2 재부팅 뒤
+자동 재시작을 제공하지 않습니다. 그런 운영 기능이 필요하면 `systemd` 같은 프로세스
+관리자를 별도로 도입해야 합니다.
 
 ### 5. 실행 확인
 
@@ -372,8 +421,8 @@ curl -s http://127.0.0.1:8000/api/auth/me/
 curl -I http://127.0.0.1:7746/login
 curl -s http://127.0.0.1:7746/api/auth/me/
 
-tail -n 50 /tmp/necton-backend.log
-tail -n 50 /tmp/necton-vite.log
+tail -n 50 backend/logs/backend.log
+tail -n 50 frontend/logs/frontend.log
 ```
 
 정상이라면 `8000`은 `127.0.0.1`, `7746`은 `0.0.0.0`에서 `LISTEN`하고 인증 상태
@@ -389,23 +438,59 @@ API는 비로그인 상태에서 다음 JSON을 반환합니다.
 
 ### 6. 종료와 재시작
 
-먼저 포트를 사용하는 정확한 PID를 확인합니다.
+저장소 루트에서 종료 스크립트를 실행합니다. 스크립트는 PID 파일에 기록된 세션이 실제
+Django 또는 Vite 프로세스인지 검증한 뒤 프로세스 그룹 전체를 종료합니다.
+
+```bash
+cd ~/workspace/Necton_RDpage
+./scripts/shutdown.sh
+```
+
+종료 결과는 다음 명령으로 확인합니다.
 
 ```bash
 sudo ss -ltnp 'sport = :8000'
 sudo ss -ltnp 'sport = :7746'
 ```
 
-출력에 표시된 PID만 종료합니다.
+스크립트가 PID 파일이나 예상 명령이 다르다는 이유로 종료를 거부하면 임의로 다른
+프로세스를 죽이지 않습니다. 먼저 저장된 세션과 실제 포트 사용 프로세스를 확인합니다.
 
 ```bash
-kill BACKEND_PID
-kill FRONTEND_PID
+cat .runtime/backend.pid .runtime/frontend.pid
+ps -eo pid,ppid,sid,pgid,stat,cmd | grep -E 'manage.py runserver|npm run dev|vite'
+sudo ss -ltnp 'sport = :8000 or sport = :7746'
 ```
 
+수동으로 실행한 프로세스를 직접 종료해야 할 때는 저장된 세션 리더와 명령이 맞는지
+확인한 다음 음수 PID로 프로세스 그룹 전체를 종료합니다.
+
+```bash
+BACKEND_PGID=$(cat .runtime/backend.pid)
+FRONTEND_PGID=$(cat .runtime/frontend.pid)
+
+ps -o pid,ppid,sid,pgid,stat,cmd -p "$BACKEND_PGID" -p "$FRONTEND_PGID"
+kill -- "-$FRONTEND_PGID"
+kill -- "-$BACKEND_PGID"
+```
+
+기존의 `nohup npm run dev ...` 방식으로 실행해 PID 파일이 없다면 `7746`의 `ss`
+출력에 표시된 실제 `FRONTEND_PID`를 확인해 `kill FRONTEND_PID`로 종료한 뒤
+`./scripts/startup.sh`로 다시 시작합니다. 같은 포트를 두 번 실행하지 않습니다.
+
 `git pull`은 `--noreload`로 실행한 백엔드를 자동 재시작하지 않습니다. 새 코드를
-받은 뒤에는 두 프로세스를 종료하고, 백엔드는 반드시 `source .env`부터 다시 실행한
-뒤 백엔드와 프론트엔드를 차례로 시작합니다.
+받기 전 `./scripts/shutdown.sh`로 두 프로세스를 종료하고, 의존성을 갱신한 다음
+`./scripts/startup.sh`로 다시 시작합니다.
+
+```bash
+cd ~/workspace/Necton_RDpage
+./scripts/shutdown.sh
+git pull --ff-only origin develop
+conda env update -f backend/environment.yml --prune
+(cd frontend && npm ci)
+conda activate necton_auth
+./scripts/startup.sh
+```
 
 로그인에서 "데이터베이스 연결에 문제가 있습니다"가 표시되는데 위의 Django DB
 조회는 성공한다면, 실행 중인 백엔드가 환경변수 없이 시작됐는지 확인합니다. 아래
@@ -418,6 +503,16 @@ sudo sh -c 'tr "\0" "\n" < /proc/BACKEND_PID/environ' \
 
 아무것도 출력되지 않으면 해당 프로세스는 `.env`를 전달받지 못한 것입니다. 프로세스를
 종료하고 `set -a`, `source .env`, `set +a`를 실행한 뒤 백엔드를 다시 시작합니다.
+
+프론트엔드 로그에는 `VITE ... ready`가 보이지만 SSH 터미널을 닫은 뒤 `7746` 포트가
+사라진다면, 이전의 `nohup` 실행 방식으로 시작됐을 가능성이 큽니다. 기존 프로세스를
+종료하고 `setsid` 명령으로 다시 실행한 뒤 SSH를 종료·재접속하여 확인합니다.
+
+```bash
+sudo ss -ltnp 'sport = :7746'
+curl -I http://127.0.0.1:7746/login
+tail -n 50 frontend/logs/frontend.log
+```
 
 ## 배포 상태
 
