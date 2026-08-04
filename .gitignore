@@ -14,4 +14,11 @@ dist/
 .vite/
 coverage/
 *.log
+
+# EC2 demo runtime files
+.runtime/
+backend/logs/
+frontend/logs/
+nohup.out
+
 .gstack/
