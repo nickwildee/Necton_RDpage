@@ -7,6 +7,7 @@ import {
 import { IntroPage } from '@pages/intro'
 import { LoginPage } from '@pages/login'
 import { ProfilePage } from '@pages/profile'
+import { ResearchPage } from '@pages/research'
 import { SettingsPage } from '@pages/settings'
 import { SignupPage } from '@pages/signup'
 
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
       {
         path: 'profile',
         element: <ProfilePage />,
+      },
+      {
+        path: 'research',
+        element: <ResearchPage />,
       },
       {
         path: 'settings',
