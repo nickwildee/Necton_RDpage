@@ -178,6 +178,14 @@ export function FeatureHierarchyPanel({
             </select>
             <SelectChevron />
           </div>
+          {selectedGroup && (
+            <p
+              className="m-0 truncate px-1 text-caption leading-5 text-ink-muted"
+              title={selectedGroup.description}
+            >
+              {selectedGroup.description}
+            </p>
+          )}
         </div>
 
         <div className="grid gap-2">
@@ -236,6 +244,14 @@ export function FeatureHierarchyPanel({
             </select>
             <SelectChevron />
           </div>
+          {selectedType && (
+            <p
+              className="m-0 truncate px-1 text-caption leading-5 text-ink-muted"
+              title={selectedType.description}
+            >
+              {selectedType.description}
+            </p>
+          )}
         </div>
       </div>
 
@@ -281,15 +297,18 @@ export function FeatureHierarchyPanel({
                   <li className="mb-1" key={group.id}>
                     <div
                       className={[
-                        'group/group-row relative flex min-h-12 items-center rounded-control border',
+                        'group/group-row relative flex items-center rounded-control border',
                         isSelected
-                          ? 'border-brand-line bg-brand-soft before:absolute before:top-2 before:bottom-2 before:left-[-1px] before:w-[3px] before:rounded-r-sm before:bg-brand'
-                          : 'border-transparent hover:bg-surface-subtle',
+                          ? 'min-h-14 border-brand-line bg-brand-soft before:absolute before:top-2 before:bottom-2 before:left-[-1px] before:w-[3px] before:rounded-r-sm before:bg-brand'
+                          : 'min-h-12 border-transparent hover:bg-surface-subtle',
                       ].join(' ')}
                     >
                       <button
                         aria-current={isSelected ? 'true' : undefined}
-                        className="min-h-11 min-w-0 flex-1 cursor-pointer border-0 bg-transparent px-3.5 text-left text-label font-bold text-ink focus-visible:rounded-control focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
+                        className={[
+                          'min-w-0 flex-1 cursor-pointer border-0 bg-transparent px-3.5 py-2 text-left text-ink focus-visible:rounded-control focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-brand',
+                          isSelected ? 'min-h-14' : 'min-h-11',
+                        ].join(' ')}
                         onClick={() => onSelectGroup(group.id)}
                         onKeyDown={(event) =>
                           handleListKeyDown(
@@ -309,9 +328,17 @@ export function FeatureHierarchyPanel({
                         }}
                         type="button"
                       >
-                        <span className="block truncate">
+                        <span className="block truncate text-label font-bold">
                           {group.feature}
                         </span>
+                        {isSelected && (
+                          <span
+                            className="mt-1 block truncate text-caption leading-4 font-normal text-ink-muted"
+                            title={group.description}
+                          >
+                            {group.description}
+                          </span>
+                        )}
                       </button>
                       <button
                         aria-label={`${group.feature} 수정`}
@@ -368,10 +395,10 @@ export function FeatureHierarchyPanel({
                                 <li className="mb-1" key={type.id}>
                                   <div
                                     className={[
-                                      'group/type-row flex min-h-11 items-center rounded-control',
+                                      'group/type-row flex items-center rounded-control',
                                       isTypeSelected
-                                        ? 'bg-brand-soft text-brand-strong'
-                                        : 'hover:bg-surface-subtle',
+                                        ? 'min-h-14 bg-brand-soft text-brand-strong'
+                                        : 'min-h-10 hover:bg-surface-subtle',
                                     ].join(' ')}
                                   >
                                     <button
@@ -380,7 +407,12 @@ export function FeatureHierarchyPanel({
                                           ? 'true'
                                           : undefined
                                       }
-                                      className="min-h-11 min-w-0 flex-1 cursor-pointer border-0 bg-transparent px-3 text-left text-caption font-semibold text-inherit focus-visible:rounded-control focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
+                                      className={[
+                                        'min-w-0 flex-1 cursor-pointer border-0 bg-transparent px-3 py-2 text-left text-inherit focus-visible:rounded-control focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-brand',
+                                        isTypeSelected
+                                          ? 'min-h-14'
+                                          : 'min-h-10',
+                                      ].join(' ')}
                                       onClick={() =>
                                         onSelectType(type.id)
                                       }
@@ -405,9 +437,17 @@ export function FeatureHierarchyPanel({
                                       }}
                                       type="button"
                                     >
-                                      <span className="block truncate">
+                                      <span className="block truncate text-label leading-4 font-semibold">
                                         {type.feature}
                                       </span>
+                                      {isTypeSelected && (
+                                        <span
+                                          className="mt-1 block truncate text-caption leading-4 font-normal text-ink-muted"
+                                          title={type.description}
+                                        >
+                                          {type.description}
+                                        </span>
+                                      )}
                                     </button>
                                     <button
                                       aria-label={`${type.feature} 수정`}

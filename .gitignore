@@ -8,9 +8,18 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+backend/.e2e-images/
+backend/.e2e-documents/
 node_modules/
 dist/
 .vite/
 coverage/
 *.log
+
+# EC2 demo runtime files
+.runtime/
+backend/logs/
+frontend/logs/
+nohup.out
+
 .gstack/

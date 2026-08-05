@@ -6,4 +6,5 @@ dependencies:
   - pip
   - pip:
       - Django==6.0.7
+      - Pillow==12.3.0
       - mysqlclient==2.2.8

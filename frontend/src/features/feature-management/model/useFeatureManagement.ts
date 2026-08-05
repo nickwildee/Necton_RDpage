@@ -5,6 +5,7 @@ import type {
   FeatureValue,
   FeatureValuePagination,
 } from '@entities/document-feature'
+import { DOCUMENT_IMAGE_GROUP_ID } from '@entities/document-feature'
 import { useAuth } from '@features/auth'
 import { ApiError } from '@shared/api'
 import type { FormErrors } from '@shared/api'
@@ -30,6 +31,8 @@ type EditorFields = {
   feature: string
   description: string
   note: string
+  physicalType: string
+  semanticRole: string
   cWeight: string
   sWeight: string
   oWeight: string
@@ -44,9 +47,11 @@ export type FeatureEditorState = {
   fields: EditorFields
 }
 
+const DEFAULT_PAGE_SIZE = 10
+
 const EMPTY_PAGINATION: FeatureValuePagination = {
   page: 1,
-  pageSize: 8,
+  pageSize: DEFAULT_PAGE_SIZE,
   totalItems: 0,
   totalPages: 1,
 }
@@ -55,6 +60,8 @@ const EMPTY_FIELDS: EditorFields = {
   feature: '',
   description: '',
   note: '',
+  physicalType: '',
+  semanticRole: '',
   cWeight: '',
   sWeight: '',
   oWeight: '',
@@ -79,7 +86,11 @@ export function useFeatureManagement() {
     useState<FeatureValuePagination>(EMPTY_PAGINATION)
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null)
+  const [selectedValueId, setSelectedValueId] = useState<number | null>(
+    null,
+  )
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [isLoadingGroups, setIsLoadingGroups] = useState(true)
   const [isLoadingTypes, setIsLoadingTypes] = useState(false)
   const [isLoadingValues, setIsLoadingValues] = useState(false)
@@ -133,6 +144,7 @@ export function useFeatureManagement() {
     setValues([])
     setPagination(EMPTY_PAGINATION)
     setPage(1)
+    setSelectedValueId(null)
 
     if (selectedGroupId === null) {
       setSelectedTypeId(null)
@@ -188,13 +200,18 @@ export function useFeatureManagement() {
     setIsLoadingValues(true)
     setGlobalError(null)
 
-    fetchFeatureValues(selectedTypeId, page)
+    fetchFeatureValues(selectedTypeId, page, pageSize)
       .then((response) => {
         if (!active) {
           return
         }
         setValues(response.items)
         setPagination(response.pagination)
+        setSelectedValueId((current) =>
+          response.items.some((value) => value.id === current)
+            ? current
+            : null,
+        )
         if (response.pagination.page !== page) {
           setPage(response.pagination.page)
         }
@@ -213,7 +230,7 @@ export function useFeatureManagement() {
     return () => {
       active = false
     }
-  }, [page, selectedTypeId, typeRevision, valueRevision])
+  }, [page, pageSize, selectedTypeId, typeRevision, valueRevision])
 
   const selectedGroup = useMemo(
     () => groups.find((group) => group.id === selectedGroupId) ?? null,
@@ -223,6 +240,10 @@ export function useFeatureManagement() {
     () => types.find((type) => type.id === selectedTypeId) ?? null,
     [selectedTypeId, types],
   )
+  const selectedValue = useMemo(
+    () => values.find((value) => value.id === selectedValueId) ?? null,
+    [selectedValueId, values],
+  )
 
   const selectGroup = (groupId: number) => {
     if (groupId === selectedGroupId) {
@@ -230,12 +251,29 @@ export function useFeatureManagement() {
     }
 
     setSelectedTypeId(null)
+    setSelectedValueId(null)
     setSelectedGroupId(groupId)
   }
 
   const selectType = (typeId: number) => {
     setPage(1)
+    setSelectedValueId(null)
     setSelectedTypeId(typeId)
+  }
+
+  const changePageSize = (nextPageSize: number) => {
+    setPage(1)
+    setSelectedValueId(null)
+    setPageSize(nextPageSize)
+  }
+
+  const changePage = (nextPage: number) => {
+    setSelectedValueId(null)
+    setPage(nextPage)
+  }
+
+  const selectValue = (valueId: number) => {
+    setSelectedValueId(valueId)
   }
 
   const openEditor = (
@@ -256,6 +294,8 @@ export function useFeatureManagement() {
             feature: item.feature,
             description: item.description ?? '',
             note: featureType?.note ?? '',
+            physicalType: featureType?.physicalType ?? '',
+            semanticRole: featureType?.semanticRole ?? '',
             cWeight: featureValue?.cWeight?.toString() ?? '',
             sWeight: featureValue?.sWeight?.toString() ?? '',
             oWeight: featureValue?.oWeight?.toString() ?? '',
@@ -325,10 +365,18 @@ export function useFeatureManagement() {
       }
 
       if (editor.kind === 'type' && selectedGroup) {
+        const isDocumentImage =
+          selectedGroup.id === DOCUMENT_IMAGE_GROUP_ID
         const payload = {
           feature: editor.fields.feature,
           description: editor.fields.description,
           note: editor.fields.note.trim() || null,
+          physicalType: isDocumentImage
+            ? editor.fields.physicalType.trim() || null
+            : null,
+          semanticRole: isDocumentImage
+            ? editor.fields.semanticRole.trim() || null
+            : null,
         }
         if (editor.mode === 'create') {
           const response = await requestWithCsrf((token) =>
@@ -355,12 +403,13 @@ export function useFeatureManagement() {
           oWeight: weightValue(editor.fields.oWeight),
         }
         if (editor.mode === 'create') {
-          await requestWithCsrf((token) =>
+          const response = await requestWithCsrf((token) =>
             createFeatureValue(
               { ...payload, typeId: selectedType.id },
               token,
             ),
           )
+          setSelectedValueId(response.item.id)
           setPage(
             Math.ceil(
               (pagination.totalItems + 1) / pagination.pageSize,
@@ -414,12 +463,16 @@ export function useFeatureManagement() {
           deleteFeatureType(editor.id!, token),
         )
         setSelectedTypeId(null)
+        setSelectedValueId(null)
         setTypeRevision((current) => current + 1)
       }
       if (editor.kind === 'value') {
         await requestWithCsrf((token) =>
           deleteFeatureValue(editor.id!, token),
         )
+        if (selectedValueId === editor.id) {
+          setSelectedValueId(null)
+        }
         if (values.length === 1 && page > 1) {
           setPage((current) => current - 1)
         } else {
@@ -444,6 +497,9 @@ export function useFeatureManagement() {
       await requestWithCsrf((token) =>
         deleteFeatureValue(featureValue.id, token),
       )
+      if (selectedValueId === featureValue.id) {
+        setSelectedValueId(null)
+      }
       if (values.length === 1 && page > 1) {
         setPage((current) => current - 1)
       } else {
@@ -461,9 +517,12 @@ export function useFeatureManagement() {
     pagination,
     selectedGroup,
     selectedType,
+    selectedValue,
     selectedGroupId,
     selectedTypeId,
+    selectedValueId,
     page,
+    pageSize,
     isLoadingGroups,
     isLoadingTypes,
     isLoadingValues,
@@ -474,7 +533,9 @@ export function useFeatureManagement() {
     isSubmitting,
     selectGroup,
     selectType,
-    setPage,
+    selectValue,
+    changePage,
+    changePageSize,
     openEditor,
     closeEditor,
     changeEditorField,

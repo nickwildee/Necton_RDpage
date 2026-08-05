@@ -4,7 +4,13 @@ from django.test import Client, TransactionTestCase
 from django.db import connection
 from django.urls import reverse
 
-from .models import FeatureGroup, FeatureType, FeatureValue, User
+from .models import (
+    FeatureGroup,
+    FeatureType,
+    FeatureValue,
+    ImageReference,
+    User,
+)
 
 
 class FeatureManagementApiTests(TransactionTestCase):
@@ -18,16 +24,19 @@ class FeatureManagementApiTests(TransactionTestCase):
             schema_editor.create_model(FeatureGroup)
             schema_editor.create_model(FeatureType)
             schema_editor.create_model(FeatureValue)
+            schema_editor.create_model(ImageReference)
 
     @classmethod
     def tearDownClass(cls):
         with connection.schema_editor() as schema_editor:
+            schema_editor.delete_model(ImageReference)
             schema_editor.delete_model(FeatureValue)
             schema_editor.delete_model(FeatureType)
             schema_editor.delete_model(FeatureGroup)
         super().tearDownClass()
 
     def setUp(self):
+        ImageReference.objects.all().delete()
         FeatureValue.objects.all().delete()
         FeatureType.objects.all().delete()
         FeatureGroup.objects.all().delete()
@@ -93,6 +102,8 @@ class FeatureManagementApiTests(TransactionTestCase):
             feature=overrides.get("feature", "Security Document"),
             description=overrides.get("description", "보안 문서"),
             note=overrides.get("note"),
+            physical_type=overrides.get("physical_type"),
+            semantic_role=overrides.get("semantic_role"),
         )
 
     def create_value(self, group, feature_type, **overrides):
@@ -284,6 +295,145 @@ class FeatureManagementApiTests(TransactionTestCase):
             group.pk,
         )
         self.assertIsNone(create_response.json()["item"]["note"])
+        self.assertIsNone(
+            create_response.json()["item"]["physicalType"]
+        )
+        self.assertIsNone(
+            create_response.json()["item"]["semanticRole"]
+        )
+
+    def test_document_image_type_accepts_image_metadata_fields(self):
+        group = FeatureGroup.objects.create(
+            feature_group_id=FeatureGroup.DOCUMENT_IMAGE_ID,
+            feature="Document Image",
+            description="문서 이미지 정보",
+        )
+        user = self.create_user()
+        client, csrf_token = self.login_client(user)
+
+        response = self.request_json(
+            client,
+            "post",
+            reverse("auth_api:feature-types"),
+            {
+                "groupId": group.pk,
+                "feature": "Logo",
+                "description": "기관 로고",
+                "physicalType": "Raster image",
+                "semanticRole": "Organization identity",
+            },
+            csrf_token=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.json()["item"]["physicalType"],
+            "Raster image",
+        )
+        self.assertEqual(
+            response.json()["item"]["semanticRole"],
+            "Organization identity",
+        )
+
+    def test_document_image_type_metadata_can_be_updated_and_cleared(self):
+        group = FeatureGroup.objects.create(
+            feature_group_id=FeatureGroup.DOCUMENT_IMAGE_ID,
+            feature="Document Image",
+            description="문서 이미지 정보",
+        )
+        feature_type = self.create_type(
+            group,
+            feature="Logo",
+            physical_type="Raster image",
+            semantic_role="Organization identity",
+        )
+        user = self.create_user()
+        client, csrf_token = self.login_client(user)
+        detail_url = reverse(
+            "auth_api:feature-type-detail",
+            args=[feature_type.pk],
+        )
+
+        update_response = self.request_json(
+            client,
+            "patch",
+            detail_url,
+            {
+                "physicalType": "Vector image",
+                "semanticRole": "Official emblem",
+            },
+            csrf_token=csrf_token,
+        )
+        clear_response = self.request_json(
+            client,
+            "patch",
+            detail_url,
+            {
+                "physicalType": "",
+                "semanticRole": None,
+            },
+            csrf_token=csrf_token,
+        )
+
+        self.assertEqual(update_response.status_code, 200)
+        self.assertEqual(
+            update_response.json()["item"]["physicalType"],
+            "Vector image",
+        )
+        self.assertEqual(
+            update_response.json()["item"]["semanticRole"],
+            "Official emblem",
+        )
+        self.assertEqual(clear_response.status_code, 200)
+        self.assertIsNone(
+            clear_response.json()["item"]["physicalType"]
+        )
+        self.assertIsNone(
+            clear_response.json()["item"]["semanticRole"]
+        )
+
+    def test_non_document_image_type_rejects_image_metadata_fields(self):
+        group = self.create_group()
+        user = self.create_user()
+        client, csrf_token = self.login_client(user)
+
+        response = self.request_json(
+            client,
+            "post",
+            reverse("auth_api:feature-types"),
+            {
+                "groupId": group.pk,
+                "feature": "Security Document",
+                "description": "보안 문서",
+                "physicalType": "Raster image",
+            },
+            csrf_token=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("physicalType", response.json()["errors"])
+
+    def test_non_document_image_type_update_rejects_image_metadata(self):
+        group = self.create_group()
+        feature_type = self.create_type(group)
+        user = self.create_user()
+        client, csrf_token = self.login_client(user)
+
+        response = self.request_json(
+            client,
+            "patch",
+            reverse(
+                "auth_api:feature-type-detail",
+                args=[feature_type.pk],
+            ),
+            {"semanticRole": "Organization identity"},
+            csrf_token=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("semanticRole", response.json()["errors"])
+        feature_type.refresh_from_db()
+        self.assertIsNone(feature_type.semantic_role)
 
     def test_value_creation_derives_group_and_type_name(self):
         group = self.create_group()
@@ -318,10 +468,10 @@ class FeatureManagementApiTests(TransactionTestCase):
         )
         self.assertIsNone(feature_value.description)
 
-    def test_value_list_is_paginated_eight_at_a_time(self):
+    def test_value_list_uses_ten_items_per_page_by_default(self):
         group = self.create_group()
         feature_type = self.create_type(group)
-        for index in range(9):
+        for index in range(11):
             self.create_value(
                 group,
                 feature_type,
@@ -334,17 +484,79 @@ class FeatureManagementApiTests(TransactionTestCase):
         first_page = client.get(url, {"typeId": feature_type.pk, "page": 1})
         second_page = client.get(url, {"typeId": feature_type.pk, "page": 2})
 
-        self.assertEqual(len(first_page.json()["items"]), 8)
+        self.assertEqual(len(first_page.json()["items"]), 10)
         self.assertEqual(len(second_page.json()["items"]), 1)
         self.assertEqual(
             first_page.json()["pagination"],
             {
                 "page": 1,
-                "pageSize": 8,
-                "totalItems": 9,
+                "pageSize": 10,
+                "totalItems": 11,
                 "totalPages": 2,
             },
         )
+
+    def test_value_list_accepts_requested_page_size(self):
+        group = self.create_group()
+        feature_type = self.create_type(group)
+        for index in range(15):
+            self.create_value(
+                group,
+                feature_type,
+                feature=f"보안 문서 {index + 1}",
+            )
+        user = self.create_user()
+        client, _ = self.login_client(user)
+
+        for page_size, item_count, total_pages in (
+            (1, 1, 15),
+            (20, 15, 1),
+            (50, 15, 1),
+        ):
+            with self.subTest(page_size=page_size):
+                response = client.get(
+                    reverse("auth_api:feature-values"),
+                    {
+                        "typeId": feature_type.pk,
+                        "page": 1,
+                        "pageSize": page_size,
+                    },
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    len(response.json()["items"]),
+                    item_count,
+                )
+                self.assertEqual(
+                    response.json()["pagination"],
+                    {
+                        "page": 1,
+                        "pageSize": page_size,
+                        "totalItems": 15,
+                        "totalPages": total_pages,
+                    },
+                )
+
+    def test_value_list_rejects_invalid_page_size(self):
+        group = self.create_group()
+        feature_type = self.create_type(group)
+        user = self.create_user()
+        client, _ = self.login_client(user)
+        url = reverse("auth_api:feature-values")
+
+        for page_size in ("not-a-number", "0", "51"):
+            with self.subTest(page_size=page_size):
+                response = client.get(
+                    url,
+                    {
+                        "typeId": feature_type.pk,
+                        "pageSize": page_size,
+                    },
+                )
+
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("pageSize", response.json()["errors"])
 
     def test_type_rename_updates_denormalized_value_names(self):
         group = self.create_group()

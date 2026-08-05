@@ -13,3 +13,7 @@ SECRET_KEY = "django-insecure-e2e-only"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
+BDM_IMAGE_ROOT = str(BASE_DIR / ".e2e-images")  # noqa: F405
+RESEARCH_DOCUMENT_ROOT = str(  # noqa: F405
+    BASE_DIR / ".e2e-documents"  # noqa: F405
+)

@@ -24,11 +24,18 @@ const kindLabels = {
   value: '소분류',
 } as const
 
+const weightFields = [
+  { name: 'cWeight', code: 'C', label: '기밀' },
+  { name: 'sWeight', code: 'S', label: '민감' },
+  { name: 'oWeight', code: 'O', label: '공개' },
+] as const
+
 export function FeatureEditorDialog({
   editor,
   errors,
   error,
   isSubmitting,
+  showImageTypeFields,
   onFieldChange,
   onClose,
   onSubmit,
@@ -38,6 +45,7 @@ export function FeatureEditorDialog({
   errors: FormErrors
   error: string | null
   isSubmitting: boolean
+  showImageTypeFields: boolean
   onFieldChange: (name: EditorFieldName, value: string) => void
   onClose: () => void
   onSubmit: () => Promise<void>
@@ -132,7 +140,7 @@ export function FeatureEditorDialog({
                   : undefined
               }
               aria-invalid={Boolean(errors.description?.length)}
-              className={`${fieldClassName} min-h-24 resize-y py-3`}
+              className={`${fieldClassName} min-h-24 resize-none py-3`}
               maxLength={editor.kind === 'group' ? 500 : 255}
               onChange={(event) =>
                 onFieldChange('description', event.target.value)
@@ -146,6 +154,67 @@ export function FeatureEditorDialog({
               messages={errors.description}
             />
           </label>
+
+          {editor.kind === 'type' && showImageTypeFields && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="flex flex-col gap-2">
+                <span className={labelClassName}>물리적 형태</span>
+                <input
+                  aria-describedby={
+                    errors.physicalType?.length
+                      ? 'physical-type-errors'
+                      : undefined
+                  }
+                  aria-invalid={Boolean(
+                    errors.physicalType?.length,
+                  )}
+                  className={fieldClassName}
+                  maxLength={255}
+                  onChange={(event) =>
+                    onFieldChange(
+                      'physicalType',
+                      event.target.value,
+                    )
+                  }
+                  placeholder="예: 래스터 이미지"
+                  value={editor.fields.physicalType}
+                />
+                <ErrorMessages
+                  className={errorClassName}
+                  id="physical-type-errors"
+                  messages={errors.physicalType}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className={labelClassName}>객체 역할</span>
+                <input
+                  aria-describedby={
+                    errors.semanticRole?.length
+                      ? 'semantic-role-errors'
+                      : undefined
+                  }
+                  aria-invalid={Boolean(
+                    errors.semanticRole?.length,
+                  )}
+                  className={fieldClassName}
+                  maxLength={255}
+                  onChange={(event) =>
+                    onFieldChange(
+                      'semanticRole',
+                      event.target.value,
+                    )
+                  }
+                  placeholder="예: 기관 식별"
+                  value={editor.fields.semanticRole}
+                />
+                <ErrorMessages
+                  className={errorClassName}
+                  id="semantic-role-errors"
+                  messages={errors.semanticRole}
+                />
+              </label>
+            </div>
+          )}
 
           {editor.kind === 'type' && (
             <label className="flex flex-col gap-2">
@@ -175,15 +244,14 @@ export function FeatureEditorDialog({
               <legend className={`${labelClassName} mb-2`}>
                 가중치
               </legend>
-              {(
-                [
-                  ['cWeight', 'C'],
-                  ['sWeight', 'S'],
-                  ['oWeight', 'O'],
-                ] as const
-              ).map(([name, label]) => (
+              {weightFields.map(({ name, code, label }) => (
                 <label className="flex flex-col gap-2" key={name}>
-                  <span className={labelClassName}>{label}</span>
+                  <span className={labelClassName}>
+                    {label}{' '}
+                    <span className="text-caption text-ink-muted">
+                      ({code})
+                    </span>
+                  </span>
                   <input
                     aria-invalid={Boolean(errors[name]?.length)}
                     className={fieldClassName}

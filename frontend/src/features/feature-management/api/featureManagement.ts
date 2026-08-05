@@ -3,6 +3,8 @@ import type {
   FeatureType,
   FeatureValue,
   FeatureValuePagination,
+  ImageReference,
+  ImageReferencePagination,
 } from '@entities/document-feature'
 import { apiRequest } from '@shared/api'
 
@@ -22,6 +24,10 @@ type ValueListResponse = ItemsResponse<FeatureValue> & {
   pagination: FeatureValuePagination
 }
 
+type ImageListResponse = ItemsResponse<ImageReference> & {
+  pagination: ImageReferencePagination
+}
+
 export type GroupPayload = {
   feature: string
   description: string
@@ -30,6 +36,8 @@ export type GroupPayload = {
 export type TypePayload = GroupPayload & {
   groupId: number
   note: string | null
+  physicalType: string | null
+  semanticRole: string | null
 }
 
 export type ValuePayload = {
@@ -54,6 +62,23 @@ function mutation<T>(
       'X-CSRFToken': csrfToken,
     },
     body: JSON.stringify(data),
+  })
+}
+
+function imageMutation<T>(
+  path: string,
+  method: 'POST' | 'PATCH' | 'DELETE',
+  csrfToken: string,
+  body: BodyInit,
+  contentType?: string,
+) {
+  return apiRequest<T>(path, {
+    method,
+    headers: {
+      ...(contentType ? { 'Content-Type': contentType } : {}),
+      'X-CSRFToken': csrfToken,
+    },
+    body,
   })
 }
 
@@ -144,10 +169,15 @@ export function deleteFeatureType(
   )
 }
 
-export function fetchFeatureValues(typeId: number, page: number) {
+export function fetchFeatureValues(
+  typeId: number,
+  page: number,
+  pageSize: number,
+) {
   const query = new URLSearchParams({
     typeId: String(typeId),
     page: String(page),
+    pageSize: String(pageSize),
   })
   return apiRequest<ValueListResponse>(
     `/api/settings/feature-values/?${query}`,
@@ -188,5 +218,67 @@ export function deleteFeatureValue(
     'DELETE',
     {},
     csrfToken,
+  )
+}
+
+export function fetchImageReferences(
+  valueId: number,
+  page: number,
+  pageSize: number,
+) {
+  const query = new URLSearchParams({
+    valueId: String(valueId),
+    page: String(page),
+    pageSize: String(pageSize),
+  })
+  return apiRequest<ImageListResponse>(
+    `/api/settings/image-references/?${query}`,
+  )
+}
+
+export function createImageReference(
+  valueId: number,
+  image: File,
+  description: string,
+  csrfToken: string,
+) {
+  const formData = new FormData()
+  formData.append('valueId', String(valueId))
+  formData.append('image', image)
+  formData.append('description', description)
+  return imageMutation<
+    ItemResponse<ImageReference> & { reactivated: boolean }
+  >(
+    '/api/settings/image-references/',
+    'POST',
+    csrfToken,
+    formData,
+  )
+}
+
+export function updateImageReference(
+  imageId: number,
+  description: string,
+  csrfToken: string,
+) {
+  return imageMutation<ItemResponse<ImageReference>>(
+    `/api/settings/image-references/${imageId}/`,
+    'PATCH',
+    csrfToken,
+    JSON.stringify({ description }),
+    'application/json',
+  )
+}
+
+export function deactivateImageReference(
+  imageId: number,
+  csrfToken: string,
+) {
+  return imageMutation<DetailResponse>(
+    `/api/settings/image-references/${imageId}/`,
+    'DELETE',
+    csrfToken,
+    JSON.stringify({}),
+    'application/json',
   )
 }
