@@ -4,6 +4,10 @@
 기준입니다. 프로젝트 구조와 인증 흐름은 [아키텍처 문서](docs/ARCHITECTURE.md)를
 참고하세요.
 
+처음 개발 환경을 구성하는 경우 [로컬 개발 환경 설정](docs/LOCAL_SETUP.md)을 먼저
+읽고, API 계약 변경은 [API 계약](docs/API.md), 운영 DB·파일 인계는
+[데이터베이스·운영 인계](docs/DATABASE_HANDOFF.md)를 함께 확인합니다.
+
 ## 작업 시작 전
 
 1. 루트와 작업 대상 디렉터리의 `AGENTS.md`를 읽습니다.
@@ -83,7 +87,8 @@ Playwright E2E 환경에서 확인합니다.
 
 ### Frontend
 
-Node.js 24를 사용합니다.
+Node.js 24.x를 사용합니다. 지원 버전과 설치 방법은
+[로컬 개발 환경 설정](docs/LOCAL_SETUP.md)을 참고합니다.
 
 ```bash
 cd frontend
@@ -96,6 +101,9 @@ npm run test:e2e
 
 Vite는 상대 `/api/` 요청을 `127.0.0.1:8000`의 Django로 프록시합니다. 프론트와
 백엔드를 같은 포트에 실행하지 않습니다.
+
+SQLite에서 인증 화면만 확인할 수 있고, `managed=False` 테이블을 사용하는 설정·연구
+데이터 화면은 격리 E2E 데모 또는 기존 MariaDB가 필요합니다.
 
 ## 변경 범위
 

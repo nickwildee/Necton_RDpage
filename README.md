@@ -21,10 +21,12 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
    [Discussions](https://github.com/nickwildee/Necton_RDpage/discussions)를 확인합니다.
 2. 이 문서와 [기여 가이드](CONTRIBUTING.md), [아키텍처](docs/ARCHITECTURE.md)를
    읽고, 작업 디렉터리의 `AGENTS.md`를 확인합니다.
+   완전히 새로운 개발 환경이면 [로컬 개발 환경 설정](docs/LOCAL_SETUP.md)도 먼저
+   따라 합니다.
 3. 일반 작업은 최신 `develop`에서 새 브랜치를 만들고 다시 `develop`으로 PR을
    보냅니다. `develop`과 `main`에는 직접 커밋하지 않습니다.
-4. 인증만 로컬에서 확인할 때는 SQLite를 사용하고, 실제 설정 화면을 확인할 때는
-   기존 MariaDB 스키마를 연결합니다.
+4. 인증만 로컬에서 확인할 때는 SQLite를 사용하고, 설정·연구 데이터 화면은 격리된
+   전체 데모 또는 기존 MariaDB 스키마를 연결해 확인합니다.
 5. 백엔드를 먼저 `127.0.0.1:8000`에 실행한 뒤 프론트엔드를 실행합니다. 브라우저의
    `/api/` 요청은 Vite가 Django로 프록시합니다.
 6. 변경 후에는 아래 [검증 기준](#검증-기준)을 실제로 실행한 결과만 PR에 기록합니다.
@@ -189,6 +191,9 @@ unzip -Z1 ../handoff-archives/Necton_RDpage-<short-sha>.zip \
 
 - [기여 가이드](CONTRIBUTING.md): Git Flow, 브랜치, 검증, PR 작성 기준
 - [아키텍처](docs/ARCHITECTURE.md): 인증 흐름, FSD 계층, DB와 배포 구조
+- [로컬 개발 환경 설정](docs/LOCAL_SETUP.md): 도구 설치, SQLite 인증, 격리 전체 데모, E2E
+- [데이터베이스·운영 인계](docs/DATABASE_HANDOFF.md): MariaDB 스키마, 파일 저장소, 인계 체크리스트
+- [API 계약](docs/API.md): 인증·설정·연구 데이터 API 요청과 응답 예시
 - [디자인 시스템](DESIGN.md): Tailwind 토큰, 타이포그래피, 공통 UI 기준
 - [에이전트 작업 규칙](AGENTS.md): 작업 에이전트가 따라야 하는 저장소 규칙
 - FSD 세부 규칙: [entities](frontend/src/entities/README.md),
@@ -204,7 +209,7 @@ unzip -Z1 ../handoff-archives/Necton_RDpage-<short-sha>.zip \
 | 소스 관리 | Git과 저장소 접근 권한 | 일반 작업과 데모 배포는 `develop`을 사용합니다. |
 | 백엔드 런타임 | Conda, Python 3.12 | 환경 이름은 `necton_auth`이며 `backend/environment.yml`로 생성합니다. |
 | 백엔드 패키지 | Django 6.0.7, Pillow 12.3.0, mysqlclient 2.2.8 | 버전은 `backend/environment.yml`에 고정되어 있습니다. |
-| 프론트엔드 런타임 | Node.js 24, npm | 패키지는 `frontend/package-lock.json` 기준으로 `npm ci`로 설치합니다. |
+| 프론트엔드 런타임 | Node.js 24.x, npm | Node.js 24가 지원 기준이며 패키지는 `frontend/package-lock.json` 기준으로 `npm ci`로 설치합니다. |
 | 데이터베이스 | MariaDB 또는 MySQL 호환 RDS | EC2에서 DB 호스트와 포트에 접근할 수 있어야 하며 기존 `USER`, `documents`, `BDM_FEATURE_*`, `BDM_IMAGE_REFERENCE` 스키마가 필요합니다. |
 | 네트워크 | 외부 `7746`, 내부 `8000`, EC2에서 DB 포트 연결 | `8000`은 외부에 공개하지 않고 Vite가 `/api/` 요청을 프록시합니다. |
 | 이미지 저장소 | Git 저장소 밖의 쓰기 가능한 디렉터리 | `BDM_IMAGE_ROOT`로 지정하며 현재 예시는 `/home/ubuntu/data/necton/images`입니다. |
@@ -301,7 +306,8 @@ Document Image 중분류에는 물리적 형태와 객체 역할을 선택적으
 
 ## Frontend
 
-Node.js 24 사용을 권장합니다.
+Node.js 24.x가 지원 기준입니다. 처음 설정하는 경우 [로컬 개발 환경 설정](docs/LOCAL_SETUP.md)의
+사전 요구사항과 격리 전체 데모 절차를 먼저 확인합니다.
 
 ```bash
 cd frontend
