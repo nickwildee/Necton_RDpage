@@ -6,10 +6,11 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
 
 ## 현재 기준
 
-- 최신 릴리스는 `v0.1.3`입니다.
-- `develop`에는 디자인 시스템 공통화, 설정 화면 반응형 개선, 분류 선택 UX 수정,
-  Playwright 인증 E2E 테스트와 Document Image 참조 이미지 관리가 후속 반영되어
-  있습니다.
+- 최신 정식 릴리스는 `v0.2.0`입니다. 연구 데이터 조회, Document Image 참조 이미지
+  관리와 설정 화면 개선을 포함합니다. 인수인계·데모·압축본의 기준은 항상 아래 절차로
+  확인한 정확한 커밋 SHA로 남깁니다.
+- `v0.2.0`에는 디자인 시스템 공통화, 설정 화면 반응형 개선, 분류 선택 UX 수정,
+  Playwright E2E 테스트, EC2 시작·종료 스크립트도 포함됩니다.
 - GitHub Actions CI는 아직 도입 전이므로 PR 전 검증 명령은 로컬에서 실행합니다.
 
 ## 후임자 빠른 시작
@@ -29,6 +30,104 @@ Necton RD Page는 문서의 내용과 특징을 분석해 어떤 조항에 해�
 6. 변경 후에는 아래 [검증 기준](#검증-기준)을 실제로 실행한 결과만 PR에 기록합니다.
 7. EC2 데모를 갱신할 때는 [EC2 데모 실행](#ec2-데모-실행)을 따릅니다. `git pull` 뒤에는
    `./scripts/shutdown.sh`, `./scripts/startup.sh`로 서비스를 직접 재시작합니다.
+
+### 인수인계 전달 순서
+
+인수인계는 "현재 작업 폴더"가 아니라 검증을 끝낸 `develop` 커밋 하나를 전달하는
+작업입니다. 먼저 열린 PR, 미병합 커밋, 로컬 변경을 정리하고, 그 커밋에서 소스 압축본을
+만듭니다.
+
+```text
+기능 브랜치 검증 → PR → develop 병합 → develop 최신화·검증
+→ 커밋 SHA 기록 → 소스 압축본·SHA-256 전달 → 수령자 압축 해제·재현 확인
+```
+
+1. GitHub의 [열린 PR](https://github.com/nickwildee/Necton_RDpage/pulls)를 확인합니다.
+   일반 기능·문서 PR은 `develop`을 대상으로 하고, `main`은 검증된 릴리스 PR에만
+   사용합니다.
+2. `develop`에 병합된 뒤 해당 커밋을 기준으로 필요한 검증을 실행합니다. 완료되지 않은
+   리뷰 의견이나 외부 시스템 확인이 남았다면 압축본의 인수인계 메모에 남깁니다.
+3. 아래 [인수인계용 소스 압축본](#인수인계용-소스-압축본)을 만들어 SHA, 생성 일시,
+   기준 커밋을 함께 전달합니다.
+4. 수령자는 압축을 푼 뒤 [후임자 빠른 시작](#후임자-빠른-시작)과 [검증 기준](#검증-기준)을
+   따라 최소한의 로컬 재현을 확인합니다.
+
+### 인수인계용 소스 압축본
+
+압축본은 Git이 추적하는 **정확한 소스 커밋**만 포함해야 합니다. `git archive`를 사용하면
+`.git`, `backend/.env`, `node_modules`, 빌드 결과물, 로그, PID 파일, SQLite 테스트 DB와
+운영 이미지·연구자료가 자동으로 빠집니다. 이들은 별도의 접근 권한·백업 정책으로
+인계하며, 소스 압축본에 넣지 않습니다.
+
+다음 명령은 `develop` 최신 커밋에서, 저장소 밖의 `handoff-archives/`에 ZIP과 전달
+메타데이터를 만듭니다. 명령을 실행하기 전 작업 트리가 비어 있어야 하며, `git status`
+결과에 의도하지 않은 변경이 있으면 먼저 소유자와 처리 방법을 확인합니다.
+
+```bash
+cd ~/workspace/Necton_RDpage
+git fetch origin
+git switch develop
+git pull --ff-only origin develop
+git status --short --branch
+
+PACKAGE_REF=$(git rev-parse HEAD)
+PACKAGE_SHORT_SHA=$(git rev-parse --short "$PACKAGE_REF")
+PACKAGE_DIR=../handoff-archives
+PACKAGE_NAME="Necton_RDpage-${PACKAGE_SHORT_SHA}"
+mkdir -p "$PACKAGE_DIR"
+
+git archive --format=zip \
+  --prefix="${PACKAGE_NAME}/" \
+  --output="$PACKAGE_DIR/${PACKAGE_NAME}.zip" \
+  "$PACKAGE_REF"
+
+{
+  printf 'project=Necton_RDpage\\n'
+  printf 'ref=%s\\n' "$PACKAGE_REF"
+  printf 'created_at_utc=%s\\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  git log -1 --format='commit_subject=%s' "$PACKAGE_REF"
+} > "$PACKAGE_DIR/${PACKAGE_NAME}.manifest"
+
+unzip -t "$PACKAGE_DIR/${PACKAGE_NAME}.zip"
+shasum -a 256 "$PACKAGE_DIR/${PACKAGE_NAME}.zip" \
+  > "$PACKAGE_DIR/${PACKAGE_NAME}.zip.sha256"
+```
+
+Ubuntu에서 `shasum`이 없다면 마지막 명령은 `sha256sum`으로 바꿉니다. 전달물은 다음 세
+파일이며, 수령자에게 기준 커밋 SHA와 SHA-256 값을 별도 채널로도 알려줍니다.
+
+```text
+Necton_RDpage-<short-sha>.zip
+Necton_RDpage-<short-sha>.manifest
+Necton_RDpage-<short-sha>.zip.sha256
+```
+
+압축을 풀기 전과 후에는 다음을 확인합니다. ZIP 안에 실제 비밀값이나 운영 데이터가
+있으면 배포하지 말고 원본 작업 폴더와 Git 추적 상태를 먼저 조사합니다.
+
+```bash
+unzip -l ../handoff-archives/Necton_RDpage-<short-sha>.zip
+unzip -t ../handoff-archives/Necton_RDpage-<short-sha>.zip
+unzip -Z1 ../handoff-archives/Necton_RDpage-<short-sha>.zip \
+  | grep -E '(^|/)(\.env|node_modules|\.git|\.runtime|logs)(/|$)' || true
+```
+
+마지막 명령의 출력은 비어 있어야 합니다. 출력이 있다면 해당 파일을 확인해 실제 비밀값
+또는 운영 데이터가 포함되지 않았는지 점검합니다.
+
+압축본만으로는 운영 환경을 재현할 수 없습니다. 아래 항목은 ZIP이나 Git에 넣지 말고,
+수령 권한이 있는 사람에게 안전한 별도 채널로 위치·담당자·접근 방법·마지막 백업 시점을
+인계합니다.
+
+| 별도 인계물 | 이유와 확인할 내용 |
+| --- | --- |
+| `backend/.env`의 실제 값 | `DJANGO_SECRET_KEY`, RDS 접속값, 허용 호스트를 포함합니다. 비밀 관리 도구 또는 암호화된 전달 채널에서만 공유합니다. |
+| MariaDB/RDS 데이터와 접근 권한 | 기존 `USER`, `documents`, `BDM_FEATURE_*`, `BDM_IMAGE_REFERENCE` 테이블이 서비스 데이터 원본입니다. 백업 위치와 스키마 확인 권한을 함께 인계합니다. |
+| `BDM_IMAGE_ROOT`의 참조 이미지 | Git에 없는 EC2 로컬 파일입니다. 디스크 경로, 소유자, 용량·백업·복구 정책을 확인합니다. |
+| `RESEARCH_DOCUMENT_ROOT`의 RD-2 원본 자료 | Git과 웹 서버가 아닌 별도 수집기/저장소가 원본입니다. 웹 EC2에서의 읽기 권한과 두 EC2 사이 파일 동기화 상태를 확인합니다. |
+| EC2·GitHub 접근 권한 | SSH 키/계정, 보안 그룹의 `7746` 규칙, GitHub 저장소·PR·Discussions 권한을 실제 담당자에게 부여합니다. |
+
+이 인계물에 비밀값 자체를 README, PR 본문, ZIP 파일명, 로그에 기록하지 않습니다.
 
 ### 현재 구현 범위
 
