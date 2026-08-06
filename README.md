@@ -252,7 +252,7 @@ MariaDB/RDS를 사용할 때는 `backend/.env.example`을 참고해 환경변수
 환경변수를 주입해야 합니다. 참조 이미지를 사용할 때는 `BDM_IMAGE_ROOT`에 Git
 저장소 밖의 경로를 지정하고 Django 프로세스에 해당 디렉터리의 쓰기 권한을 줍니다.
 연구자료 링크를 사용할 때는 `RESEARCH_DOCUMENT_ROOT`에 EC2의 RD-2 원본 자료
-디렉터리인 `/home/ubuntu/data/raw`를 지정하고 Django 프로세스에 읽기 권한을 줍니다.
+디렉터리인 `/home/ubuntu/data/ingested_documents`를 지정하고 Django 프로세스에 읽기 권한을 줍니다.
 
 ### 인증 API
 
@@ -421,7 +421,7 @@ DB_USER=DATABASE_USER
 DB_PASSWORD=DATABASE_PASSWORD
 
 BDM_IMAGE_ROOT=/home/ubuntu/data/necton/images
-RESEARCH_DOCUMENT_ROOT=/home/ubuntu/data/raw
+RESEARCH_DOCUMENT_ROOT=/home/ubuntu/data/ingested_documents
 ```
 
 이미지 저장 디렉터리는 Git 저장소 밖에 만들고 백엔드 실행 사용자에게 쓰기 권한을
@@ -431,13 +431,14 @@ RESEARCH_DOCUMENT_ROOT=/home/ubuntu/data/raw
 mkdir -p /home/ubuntu/data/necton/images
 ```
 
-연구자료 저장소는 운영 EC2의 RD-2 원본 자료 디렉터리인 `/home/ubuntu/data/raw`를
-그대로 사용합니다. `documents.body_file_path`와 `other_file_paths`에는 이 루트 기준
+연구자료 저장소는 운영 EC2의 RD-2 수집 파일 디렉터리인
+`/home/ubuntu/data/ingested_documents`를 그대로 사용합니다.
+`documents.body_file_path`와 `other_file_paths`에는 이 루트 기준
 상대경로가 저장됩니다. DB에 경로가 있어도 원본 파일이 없는 레거시 문서는 파일 API가
 404를 반환합니다. 파일을 복사하거나 Git 저장소 안으로 옮기지 않습니다.
 
 ```bash
-test -r /home/ubuntu/data/raw
+test -r /home/ubuntu/data/ingested_documents
 ```
 
 Django 자체는 `.env` 파일을 자동으로 읽지 않습니다. `scripts/startup.sh`는 이 파일을

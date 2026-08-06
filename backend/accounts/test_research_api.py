@@ -336,6 +336,37 @@ class ResearchApiTests(TransactionTestCase):
             b"pdf-content",
         )
 
+    def test_ingested_document_tree_is_streamed_from_configured_root(self):
+        relative_path = Path(
+            "000",
+            "000",
+            "036",
+            "692",
+            "36692",
+            "original",
+            "36624799_결재문서본문.hwpx",
+        )
+        target = Path(self.document_directory.name) / relative_path
+        target.parent.mkdir(parents=True)
+        target.write_bytes(b"ingested-document-content")
+        document = self.create_document(
+            body_file_path=relative_path.as_posix()
+        )
+        client = self.login_client(self.create_user())
+
+        response = client.get(
+            reverse(
+                "auth_api:research-document-body-file",
+                args=[document.pk],
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            b"".join(response.streaming_content),
+            b"ingested-document-content",
+        )
+
     def test_other_office_file_is_downloaded_by_index(self):
         relative_paths = [
             Path("mohw", "report", "참고.pdf"),
