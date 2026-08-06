@@ -132,7 +132,7 @@ React 가상화 훅을 재사용할 수 있습니다.
 `production_date DESC, id DESC`로 정렬하고 서버에서 30건씩 페이지를 나눕니다.
 
 파일 경로는 RD-2 수집기가 `RESEARCH_DOCUMENT_ROOT` 기준 상대경로로 저장하며,
-운영 EC2에서는 `/home/ubuntu/data/raw`를 루트로 사용합니다. DB에 경로만 남고 실제
+운영 EC2에서는 `/home/ubuntu/data/ingested_documents`를 루트로 사용합니다. DB에 경로만 남고 실제
 파일이 없는 레거시 문서는 파일 API에서 404로 처리합니다.
 목록 API는 원본 경로를 반환하지 않고 파일명과 문서 ID 기반 URL만 제공합니다.
 파일 API는 인증 후 DB에서 경로를 다시 읽고, 경로 이동과 심볼릭 링크로 설정 루트
